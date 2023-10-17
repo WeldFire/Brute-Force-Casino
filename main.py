@@ -146,15 +146,24 @@ async def claimChumba():
         
         
         if(loaded_image is claim_img_path):
-            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+            else:
+                logging.warn(f"No health check run url defined for {name}")
             #Adjust for looking at the close button
             click_point(loaded_location.left+(loaded_location.width/2), loaded_location.top-45+(loaded_location.height/2))
-            ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+            if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+            else:
+                logging.warn(f"No health check claim url defined for {name}")
             balance = await getChumbaSCBalance(page)
             print(f"Current Chumba Balance is {balance}")
         elif(loaded_image is noclaim_img_path):
             print(f"No claim available right now!")
-            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+            else:
+                logging.warn(f"No health check run url defined for {name}")
             balance = await getChumbaSCBalance(page)
             print(f"Current Chumba Balance is {balance}")
         else:
@@ -204,14 +213,27 @@ async def claimPulsz():
     loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 50)
     
     if(loaded_image is claim_img_path):
-        ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        else:
+            logging.warn(f"No health check run url defined for {name}")
+
         click_location(loaded_location)
-        ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+
+        if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+        else:
+            logging.warn(f"No health check claim url defined for {name}")
         balance = await getPulszSCBalance(page)
         print(f"Current Pulsz Balance is {balance}")
     elif(loaded_image is noclaim_img_path):
         print(f"No claim available right now!")
-        ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+
+        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        else:
+            logging.warn(f"No health check run url defined for {name}")
+
         balance = await getPulszSCBalance(page)
         print(f"Current Pulsz Balance is {balance}")
     else:
@@ -312,7 +334,11 @@ async def claimChanced():
                 
                 claimed = wait_for_image(base_path+"claimed.png", 20)
                 if(claimed):
-                    ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+                    if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
+                        ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+                    else:
+                        logging.warn(f"No health check claim url defined for {name}")
+
                     balance = await getChancedSCBalance(page)
                     print(f"Current Chanced Balance is {balance}")
                 else:
@@ -389,7 +415,11 @@ async def claimLuckylandslots():
     # page = (await browser.pages())[-1]
 
     if(loaded_image is claim_img_path):
-        ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        else:
+            logging.warn(f"No health check run url defined for {name}")
+
         #Adjust for looking at the close button
         # click_point(loaded_location.left+(loaded_location.width/2), loaded_location.top-45+(loaded_location.height/2))
         click_location(loaded_location)
@@ -399,7 +429,12 @@ async def claimLuckylandslots():
             
         #     claimed = wait_for_image(base_path+"claimed.png", 20)
         #     if(claimed):
-        ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+
+        if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+        else:
+            logging.warn(f"No health check claim url defined for {name}")
+
         balance = await getLuckylandSCBalance(page)
         print(f"Current lucky land Balance is {balance}")
         #     else:
@@ -413,7 +448,12 @@ async def claimLuckylandslots():
             
     elif(loaded_image is noclaim_img_path):
         print(f"No claim available right now!")
-        ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+
+        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        else:
+            logging.warn(f"No health check run url defined for {name}")
+
         balance = await getLuckylandSCBalance(page)
         print(f"Current luckyland Balance is {balance}")
     else:
@@ -472,7 +512,11 @@ async def claimFortuneCoins():
     # page = (await browser.pages())[-1]
 
     if(loaded_image is claim_img_path):
-        ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        else:
+            logging.warn(f"No health check run url defined for {name}")
+
         #Adjust for looking at the close button
         # click_point(loaded_location.left+(loaded_location.width/2), loaded_location.top-45+(loaded_location.height/2))
         click_location(loaded_location)
@@ -482,7 +526,12 @@ async def claimFortuneCoins():
             
         #     claimed = wait_for_image(base_path+"claimed.png", 20)
         #     if(claimed):
-        ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+
+        if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+        else:
+            logging.warn(f"No health check claim url defined for {name}")
+
         balance = await getFortuneCoinsSCBalance(page)
         print(f"Current fortune coins Balance is {balance}")
         #     else:
@@ -496,7 +545,12 @@ async def claimFortuneCoins():
             
     elif(loaded_image is noclaim_img_path):
         print(f"No claim available right now!")
-        ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+
+        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+        else:
+            logging.warn(f"No health check run url defined for {name}")
+
         balance = await getFortuneCoinsSCBalance(page)
         print(f"Current fortune coins Balance is {balance}")
     else:
@@ -654,13 +708,23 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         if(not claim_success_location):
             return report_failure(logging_prefix, f"{name_stub}_claim_success_fail.png", f"Unable to determine that the claim was finished successfully!")
         
-        ping(health_check_successful_run)
-        ping(health_check_successful_claim)
-        
+        if(health_check_successful_run):
+            ping(health_check_successful_run)
+        else:
+            logging.warn(f"No health check run url defined for {name}")
+
+        if(health_check_successful_claim):
+            ping(health_check_successful_claim)
+        else:
+            logging.warn(f"No health check claim url defined for {name}")
+
         logging.info(f"{logging_prefix}Finished successfully claiming!")
     elif(claim_check_image is noclaim_available_path):
         logging.debug(f"{logging_prefix}There is no claim available at this time")
-        ping(health_check_successful_run)
+        if(health_check_successful_run):
+            ping(health_check_successful_run)
+        else:
+            logging.warn(f"No health check run url defined for {name}")
     else:
         return report_failure(logging_prefix, f"{name_stub}_claim_determination_fail.png", f"Unable to determine if there was a claim available!")
     
