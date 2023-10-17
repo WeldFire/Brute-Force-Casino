@@ -1,0 +1,4 @@
+config.json
+*_fail.png
+__pycache__/*
+

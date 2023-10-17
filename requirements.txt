@@ -1,0 +1,6 @@
+pyautogui
+pytesseract
+pywinauto
+pygetwindow
+pyppeteer
+asyncio

@@ -1,0 +1,38 @@
+{
+    "Chanced":{
+        "username":"",
+        "password":"",
+        "health_check_successful_run":"https://healthchecks.io/ping/f5d2bf07-88a0-4908-9d2b-5df01ce1f4dc",
+        "health_check_successful_claim":"https://healthchecks.io/ping/2223e9b4-1aa2-4119-86b1-730480208540"
+    },
+    "Chumba":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/30e9ac57-a89b-48a6-92a2-9a96e106b9d8",
+        "health_check_successful_claim":"https://healthchecks.io/ping/0b0a0a0d-291f-4d74-8c31-b71ec77c27be"
+    },
+    "Lucky Land":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/95fc23c9-196a-4c7a-97d6-911619bb1f69",
+        "health_check_successful_claim":"https://healthchecks.io/ping/88b59f9d-3cc9-4e33-ad67-9800b527d9fb"
+    },
+    "Fortune Coins":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/14b1d293-cac0-4a4c-a4ab-0bb5457b9c3a",
+        "health_check_successful_claim":"https://healthchecks.io/ping/17758925-a7fd-48f9-bb59-4396a0a414de"
+    },
+    "Zula":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/c7920642-baa0-4ef6-8d0c-a6d2252e378a",
+        "health_check_successful_claim":"https://healthchecks.io/ping/637f88ed-b600-4a68-bf91-ca1905e081df"
+    },
+    "Pulsz":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/8e2bf816-2542-4918-b08c-36af850db0ad",
+        "health_check_successful_claim":"https://healthchecks.io/ping/b65144b9-623f-4980-8d64-8cc2c53f5665"
+    }
+}
