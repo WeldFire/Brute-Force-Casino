@@ -617,7 +617,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     # Try to navigate to the webpage initially
     logging.debug(f"{logging_prefix}Trying to navigate to {base_url}")
     browser, page = await start_browser(base_url)
-    webpage_loaded = wait_for_image(base_path+"webpage-loaded.png", 20)
+    webpage_loaded = wait_for_image(base_path+"webpage-loaded.png", 100)
     if not webpage_loaded:
         return report_failure(logging_prefix, f"{name_stub}_navigation_fail.png", f"Unable to load webpage of {name} for some reason!")
     logging.debug(f"{logging_prefix}Able to successfully navigate to {base_url}")
