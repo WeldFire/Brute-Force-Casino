@@ -8,6 +8,7 @@ import requests
 import logging
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
+from enums.CasinoEnum import CasinoEnum
 from utils import get_active_window_title
 from enum import Enum
 import json
@@ -773,14 +774,27 @@ async def main(schedule = RunSchedule.All):
     ping("https://healthchecks.weldware.net/ping/08aab5ce-4bb7-4b3e-8e4c-01c7e0e08b75")
     try:        
         if(schedule == RunSchedule.All or schedule == RunSchedule.SixHours):
-            await claimChumba()
-            await claimPulsz()
-            await claimLuckylandslots()
-            await claimFortuneCoinsV2()
-            await claimZula()
+            
+            #Get all of the keys from the config, which should match the enum values from CasinoEnum
+            casino_list = list(CONFIGURATION.keys())
+            
+            #Check if each of the Enums exist in the key list, so we know if the configuration has been fileld out
+            #TODO: Check to make sure that username and pass are not empty strings before continuing
+            if CasinoEnum.CHUMBA.value in casino_list:
+                print("Chumba")
+                #Run Chumba claim
+                #...
+            
+
+
+            #await claimChumba()
+            #await claimPulsz()
+            #await claimLuckylandslots()
+            #await claimFortuneCoinsV2()
+            #await claimZula()
         
-        if(schedule == RunSchedule.All or schedule == RunSchedule.EveryHour):
-            await claimChancedV2()
+        #if(schedule == RunSchedule.All or schedule == RunSchedule.EveryHour):
+            #await claimChancedV2()
     except KeyboardInterrupt:
         pass
         
@@ -811,3 +825,10 @@ if __name__ ==  '__main__':
     except (KeyboardInterrupt, SystemExit):
         logging.warning('Got SIGTERM! Terminating...')
         scheduler.shutdown(wait=False)
+
+
+
+#TODO: move browser.exe (browser_path) to config json
+#TODO: move and update browser_title_fragment = " - Opera" to config, if not using Opera, chrome is "- Google Chrome"
+#TODO: Move each casino functions to it's own class
+#TODO: Move urls to config.json or to casinos.json, create a new one

@@ -4,3 +4,4 @@ pywinauto
 pygetwindow
 pyppeteer
 asyncio
+apscheduler
