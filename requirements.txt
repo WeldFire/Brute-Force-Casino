@@ -4,3 +4,6 @@ pywinauto
 pygetwindow
 pyppeteer
 asyncio
+requests
+apscheduler
+psutil
