@@ -1,5 +1,10 @@
 # Brute Force Casino
 
+## Requirements
+
+`Python 3.10.0` or greater
+[https://www.python.org/downloads/release/python-3100/]
+
 ## Setup Instructions
 
 This is a Python project. Follow the steps below to set it up:
