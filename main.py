@@ -19,10 +19,12 @@ class RunSchedule(Enum):
   All = 0
 
 
+CONFIG_BASE = "BASE"
 CONFIG_USERNAME="username"
 CONFIG_PASSWORD="password"
 CONFIG_HEALTH_RUN="health_check_successful_run"
 CONFIG_HEALTH_CLAIM="health_check_successful_claim"
+CONFIG_HEALTH_CHECK_TOOL_RUNNING = "health_check_tool_running"
 
 # logging.basicConfig(level=logging.DEBUG)
 logging = logging.getLogger(__name__)
@@ -822,7 +824,11 @@ async def claimModo():
 
 
 async def main(schedule = RunSchedule.All):
-    ping("https://healthchecks.weldware.net/ping/08aab5ce-4bb7-4b3e-8e4c-01c7e0e08b75")
+    if (CONFIG_BASE in CONFIGURATION and CONFIG_HEALTH_CHECK_TOOL_RUNNING in CONFIGURATION[CONFIG_BASE]):
+        ping(CONFIGURATION[CONFIG_BASE][CONFIG_HEALTH_CHECK_TOOL_RUNNING])
+    else:
+        logging.warn("Base configuration health check url wasn't defined so its ping will be skipped")
+        
     try:        
         if(schedule == RunSchedule.All or schedule == RunSchedule.SixHours):
             await claimChumba()

@@ -1,4 +1,7 @@
 {
+    "BASE":{
+        "health_check_tool_running":"https://healthchecks.io/ping/f5d2bf07-88a0-4908-9d2b-5df01ce1f4dc"
+    },
     "Chanced":{
         "username":"",
         "password":"",
