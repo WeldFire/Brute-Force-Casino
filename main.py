@@ -1,3 +1,4 @@
+import os
 import pyautogui
 import time
 import pytesseract
@@ -31,6 +32,8 @@ logging = logging.getLogger(__name__)
 # browser_title_fragment = " - Brave"
 browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
 browser_title_fragment = " - Opera"
+# browser_path = r'firefox'
+# browser_title_fragment = " - Mozilla Firefox"
 
 # pytesseract.pytesseract.tesseract_cmd = r'<path_to_your_tesseract_executable>'
 
@@ -102,7 +105,7 @@ def find_image(image_file_path, confidence=0.9, minSearchTime=0):
     # Use image recognition to locate elements on the page
     location = pyautogui.locateOnScreen(image_file_path, minSearchTime, confidence=confidence)
     if location:
-        print(f"Location of the image is: {location}")
+        logging.debug(f"Location of the image is: {location}")
     # else:
     #     print("Image not found!")
     return location
@@ -593,11 +596,12 @@ def report_failure(logging_prefix, screenshot_name, message):
 # Claim Available/Not available
 # Claim Button
 # Claim Confirmation 
-# REQUIRED FILES:
+# EXPECTED FILES:
 # - webpage-loaded.png - Determines if the initial load works (Visual Only)
 # - login_required.png - Determines if you need to login (Visual Only)
 # - login_not_required.png - Determines if you are already logged in (Visual Only)
 # - start_login.png - Starts the login process, typically the 'login' button (Clicked)
+# - login_selection.png - OPTIONAL - Starts the login process with the specified type, typically email and password (Clicked)
 # - pass_field.png - Password field (Clicked and Typed on)
 # - email_field.png - Email/Username field (Clicked and Typed on)
 # - submit_login.png - Button that will attempt to login with the provided credentials (Clicked)
@@ -605,6 +609,11 @@ def report_failure(logging_prefix, screenshot_name, message):
 # - noclaim_available.png - Determines if there is no claim currently available to claim right now (Visual Only)
 # - claim_confirmation.png - Ensures that claim confirmations are clicked (Clicked)
 # - claim_success.png - Indicator that the claim was successful (Visual Only)
+# EXPECTED CONFIGURATION:
+# - username - The username or email field to be used to login
+# - password - The password used to login
+# - health_check_successful_run - OPTIONAL The health check endpoint 
+# - health_check_successful_claim
 async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, claimAvailableClickOffset=None):
     username = CONFIGURATION[name][CONFIG_USERNAME]
     password = CONFIGURATION[name][CONFIG_PASSWORD]
@@ -615,23 +624,23 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     logging_prefix = f"GenericClaim - {name} - "
     
     # Try to navigate to the webpage initially
-    logging.debug(f"{logging_prefix}Trying to navigate to {base_url}")
+    logging.info(f"{logging_prefix}Trying to navigate to {base_url}")
     browser, page = await start_browser(base_url)
     webpage_loaded = wait_for_image(base_path+"webpage-loaded.png", 100)
     if not webpage_loaded:
         return report_failure(logging_prefix, f"{name_stub}_navigation_fail.png", f"Unable to load webpage of {name} for some reason!")
-    logging.debug(f"{logging_prefix}Able to successfully navigate to {base_url}")
+    logging.info(f"{logging_prefix}Able to successfully navigate to {base_url}")
     
     # Are we logged in? or do we need to login now?
-    logging.debug(f"{logging_prefix}Trying to detect if we need to login")
+    logging.info(f"{logging_prefix}Trying to detect if we need to login")
     
     login_required_path = base_path+"login_required.png"
     login_not_required_path = base_path+"login_not_required.png"
     _, login_check_image = wait_for_any_image_to_exist([login_required_path, login_not_required_path], 50)
     if (login_check_image is login_required_path):
-        logging.debug(f"{logging_prefix}Login is required")
+        logging.info(f"{logging_prefix}Login is required")
         
-        logging.debug(f"{logging_prefix}Attempting to login")
+        logging.info(f"{logging_prefix}Attempting to login")
         
         start_login_button = wait_for_image(base_path+"start_login.png", 20)
         if(not start_login_button):
@@ -639,9 +648,20 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
             
         click_location(start_login_button)
         
-        logging.debug(f"{logging_prefix}Attempting to find login elements")
+        # OPTIONAL - Try to find login selector if it was defined
+        login_selection_image = base_path+"login_selection.png"
+        if os.path.isfile(login_selection_image):
+            logging.info(f"{logging_prefix}Attempting to find login selection element")
+            
+            login_selection_button = wait_for_image(login_selection_image, 20)
+            if(not login_selection_button):
+                return report_failure(logging_prefix, f"{name_stub}_select_login_type_fail.png", f"Unable to find the login selection button provided for some reason!")
+                
+            click_location(login_selection_button)
         
-        logging.debug(f"{logging_prefix}Attempting to fill password")
+        logging.info(f"{logging_prefix}Attempting to find login elements")
+        
+        logging.info(f"{logging_prefix}Attempting to fill password")
         pass_field_location = wait_for_image(base_path+"pass_field.png", 20, 0.1, 0.99)
         if(not pass_field_location):
             return report_failure(logging_prefix, f"{name_stub}_locate_password_field_fail.png", f"Unable to find the password field for some reason!")
@@ -650,14 +670,14 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         pyautogui.typewrite(password)
         
         
-        logging.debug(f"{logging_prefix}Attempting to fill username")
+        logging.info(f"{logging_prefix}Attempting to fill username")
         email_field_location = wait_for_image(base_path+"email_field.png", 20, 0.1, 0.99)
         if(not email_field_location):
             return report_failure(logging_prefix, f"{name_stub}_locate_email_field_fail.png", f"Unable to find the email/username field for some reason!")
         click_location(email_field_location)
         pyautogui.typewrite(username)
         
-        logging.debug(f"{logging_prefix}Attempting to submit login information")
+        logging.info(f"{logging_prefix}Attempting to submit login information")
         login_button_location = wait_for_image(base_path+"submit_login.png", 20, 0.1, 0.8)
         if(not login_button_location):
             return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason!")
@@ -667,26 +687,26 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         if(not logged_in):
             return report_failure(logging_prefix, f"{name_stub}_login_fail.png", f"Unable to login!")
     elif (login_check_image is login_not_required_path):
-        logging.debug(f"{logging_prefix}Login is not required!")
+        logging.info(f"{logging_prefix}Login is not required!")
     else:
         return report_failure(logging_prefix, f"{name_stub}_login_determination_fail.png", f"Unable to determine if we need to login to {name} for some reason!")
     
-    logging.debug(f"{logging_prefix}Finished ensuring that we are logged in!")
+    logging.info(f"{logging_prefix}Finished ensuring that we are logged in!")
     
     if(customNavigateToClaim is not None):
-        logging.debug(f"{logging_prefix}A custom claim navigation was provided, so we will call it now")
+        logging.info(f"{logging_prefix}A custom claim navigation was provided, so we will call it now")
         await customNavigateToClaim(base_path, browser, page)
-        logging.debug(f"{logging_prefix}Finished calling custom claim navigation")
+        logging.info(f"{logging_prefix}Finished calling custom claim navigation")
     
     # Determine if there is a Claim Available or not
-    logging.debug(f"{logging_prefix}Trying to determine if there is a claim available!")
+    logging.info(f"{logging_prefix}Trying to determine if there is a claim available!")
     
     claim_available_path = base_path+"claim_available.png"
     noclaim_available_path = base_path+"noclaim_available.png"
     claim_check_location, claim_check_image = wait_for_any_image_to_exist([claim_available_path, noclaim_available_path], 50)
 
     if(claim_check_image is claim_available_path):
-        logging.debug(f"{logging_prefix}There is a claim available!")
+        logging.info(f"{logging_prefix}There is a claim available!")
         
         
         claim_check_locationX, claim_check_locationY = location_to_point(claim_check_location)
@@ -720,7 +740,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
 
         logging.info(f"{logging_prefix}Finished successfully claiming!")
     elif(claim_check_image is noclaim_available_path):
-        logging.debug(f"{logging_prefix}There is no claim available at this time")
+        logging.info(f"{logging_prefix}There is no claim available at this time")
         if(health_check_successful_run):
             ping(health_check_successful_run)
         else:
@@ -731,12 +751,29 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     # TODO get the current balance here    
     
     # Finished, time to wrap up
-    logging.debug(f"{logging_prefix}Finished checking claim, wrapping up")
+    logging.info(f"{logging_prefix}Finished checking claim, wrapping up")
     
-    logging.debug(f"{logging_prefix}Attempting to close browser")
+    logging.info(f"{logging_prefix}Attempting to close browser")
     await browser.close()
 
-
+async def navigateToHigh5Claim(base_path, browser, page):
+    # Is bonus_popup_open.png ?
+    bonus_popup_open = wait_for_image(base_path+"bonus_popup_open.png", 20)
+    if not bonus_popup_open:    
+        # Open bonus_popup.png
+        bonus_popup = wait_for_image(base_path+"bonus_popup.png", 20)
+        if not bonus_popup:
+            return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_navigation_fail.png", f"Unable to open the bonus popup window!")
+            
+        click_location(bonus_popup)
+        
+        # Is bonus_popup_open.png now?
+        bonus_popup_open_confirmation = wait_for_image(base_path+"bonus_popup_open.png", 20)
+        if not bonus_popup_open_confirmation:    
+            return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_confirmation_fail.png", f"Unable to confirm the popup is open!")
+    
+    
+    
 
 async def navigateToZulaClaim(base_path, browser, page):
     # close_modal.png
@@ -766,7 +803,22 @@ async def claimFortuneCoinsV2():
             name="Fortune Coins",
             base_path="imgs/fortune/",
             base_url="https://www.fortunecoins.com/"
-        )   
+        )
+    
+async def claimHigh5():
+    return await genericClaim(
+            name="High 5",
+            base_path="imgs/high5/",
+            base_url="https://club5.high5casino.com/gc",
+            customNavigateToClaim=navigateToHigh5Claim
+        )
+    
+async def claimModo():
+    return await genericClaim(
+            name="Modo",
+            base_path="imgs/modo/",
+            base_url="https://modo.us/lobby?value=APPROVED"
+        )
 
 
 async def main(schedule = RunSchedule.All):
@@ -778,6 +830,8 @@ async def main(schedule = RunSchedule.All):
             await claimLuckylandslots()
             await claimFortuneCoinsV2()
             await claimZula()
+            await claimHigh5()
+            await claimModo()
         
         if(schedule == RunSchedule.All or schedule == RunSchedule.EveryHour):
             await claimChancedV2()
