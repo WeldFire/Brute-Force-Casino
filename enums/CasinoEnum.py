@@ -6,7 +6,9 @@ class CasinoEnum(Enum):
     LUCKYLAND = "Lucky Land"
     FORTUNECOINS = "Fortune Coins"
     ZULA = "Zula"
-    PULZ = "Pulsz"
+    PULSZ = "Pulsz"
+    HIGH5 = "High 5"
+    MODO = "Modo"
  
 
 

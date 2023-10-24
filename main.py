@@ -12,7 +12,16 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from enums.CasinoEnum import CasinoEnum
 from utils import get_active_window_title
 from enum import Enum
+from Casinos.Chumba import Chumba
+from Casinos.Pulsz import Pulsz
 import json
+
+from Configuration import CONFIG_BASE
+from Configuration import CONFIG_USERNAME
+from Configuration import CONFIG_PASSWORD
+from Configuration import CONFIG_HEALTH_RUN
+from Configuration import CONFIG_HEALTH_CLAIM
+from Configuration import CONFIG_HEALTH_CHECK_TOOL_RUNNING
     
 class RunSchedule(Enum):
   SixHours = 6
@@ -20,12 +29,12 @@ class RunSchedule(Enum):
   All = 0
 
 
-CONFIG_BASE = "BASE"
-CONFIG_USERNAME="username"
-CONFIG_PASSWORD="password"
-CONFIG_HEALTH_RUN="health_check_successful_run"
-CONFIG_HEALTH_CLAIM="health_check_successful_claim"
-CONFIG_HEALTH_CHECK_TOOL_RUNNING = "health_check_tool_running"
+#CONFIG_BASE = "BASE"
+#CONFIG_USERNAME="username"
+#CONFIG_PASSWORD="password"
+#CONFIG_HEALTH_RUN="health_check_successful_run"
+#CONFIG_HEALTH_CLAIM="health_check_successful_claim"
+#CONFIG_HEALTH_CHECK_TOOL_RUNNING = "health_check_tool_running"
 
 # logging.basicConfig(level=logging.DEBUG)
 logging = logging.getLogger(__name__)
@@ -824,6 +833,10 @@ async def claimModo():
         )
 
 
+
+def testChumbaClaim(self):
+    print("test chumba claim")
+
 async def main(schedule = RunSchedule.All):
     if (CONFIG_BASE in CONFIGURATION and CONFIG_HEALTH_CHECK_TOOL_RUNNING in CONFIGURATION[CONFIG_BASE]):
         ping(CONFIGURATION[CONFIG_BASE][CONFIG_HEALTH_CHECK_TOOL_RUNNING])
@@ -835,14 +848,52 @@ async def main(schedule = RunSchedule.All):
             
             #Get all of the keys from the config, which should match the enum values from CasinoEnum
             casino_list = list(CONFIGURATION.keys())
-            
+        
+
             #Check if each of the Enums exist in the key list, so we know if the configuration has been fileld out
-            #TODO: Check to make sure that username and pass are not empty strings before continuing
-            if CasinoEnum.CHUMBA.value in casino_list:
+
+            if CasinoEnum.CHANCED.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("password")) >  0:
+                print("Chanced")
+                #Run Chanced claim
+                #...
+
+            if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
                 print("Chumba")
                 #Run Chumba claim
-                #...
+                chumba = Chumba(CONFIGURATION.get(CasinoEnum.CHUMBA.value))
+                chumba.testChumbaClaim()
             
+            if CasinoEnum.LUCKYLAND.value in casino_list and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("password")) >  0:
+                print("Lucky Land")
+                #Run Lucky Land claim
+                #...
+
+            if CasinoEnum.FORTUNECOINS.value in casino_list and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("password")) >  0:
+                print("Fortune Coins")
+                #Run Chumba claim
+                #...    
+
+            if CasinoEnum.ZULA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("password")) >  0:
+                print("Zula")
+                #Run Zula claim
+                #...       
+
+            if CasinoEnum.PULSZ.value in casino_list and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("password")) >  0:
+                print("Pulsz")
+                #Run Pulsz claim
+                pulsz = Pulsz(CONFIGURATION.get(CasinoEnum.PULSZ.value))
+                pulsz.testPulszClaim()       
+            
+            if CasinoEnum.HIGH5.value in casino_list and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("password")) >  0:
+                print("High 5")
+                #Run High 5 claim
+                #...  
+
+            if CasinoEnum.MODO.value in casino_list and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("password")) >  0:
+                print("Modo")
+                #Run Modo claim
+                #...                 
+
             #await claimChumba()
             #await claimPulsz()
             #await claimLuckylandslots()
@@ -850,9 +901,6 @@ async def main(schedule = RunSchedule.All):
             #await claimZula()
             #await claimHigh5()
             #await claimModo()
-        
-        #if(schedule == RunSchedule.All or schedule == RunSchedule.EveryHour):
-            #await claimChancedV2()
     except KeyboardInterrupt:
         pass
         

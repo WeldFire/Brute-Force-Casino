@@ -1,0 +1,6 @@
+CONFIG_BASE = "BASE"
+CONFIG_USERNAME="username"
+CONFIG_PASSWORD="password"
+CONFIG_HEALTH_RUN="health_check_successful_run"
+CONFIG_HEALTH_CLAIM="health_check_successful_claim"
+CONFIG_HEALTH_CHECK_TOOL_RUNNING = "health_check_tool_running"
