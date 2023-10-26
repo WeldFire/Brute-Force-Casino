@@ -14,6 +14,8 @@ from utils import get_active_window_title
 from enum import Enum
 from Casinos.Chumba import Chumba
 from Casinos.Pulsz import Pulsz
+from Casinos.LuckyLand import LuckyLand
+from Casinos.FortuneCoins import FortuneCoins
 import json
 
 from Configuration import CONFIG_BASE
@@ -858,20 +860,19 @@ async def main(schedule = RunSchedule.All):
                 #...
 
             if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
-                print("Chumba")
                 #Run Chumba claim
                 chumba = Chumba(CONFIGURATION.get(CasinoEnum.CHUMBA.value))
                 chumba.testChumbaClaim()
             
             if CasinoEnum.LUCKYLAND.value in casino_list and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("password")) >  0:
-                print("Lucky Land")
                 #Run Lucky Land claim
-                #...
+                luckyland = LuckyLand(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value))
+                luckyland.testLuckyLandClaim()
 
             if CasinoEnum.FORTUNECOINS.value in casino_list and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("password")) >  0:
-                print("Fortune Coins")
-                #Run Chumba claim
-                #...    
+                #Run Fotune Coins claim
+                fortunecoins = FortuneCoins(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value))
+                fortunecoins.testFortuneCoinsClaim()   
 
             if CasinoEnum.ZULA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("password")) >  0:
                 print("Zula")
@@ -879,7 +880,6 @@ async def main(schedule = RunSchedule.All):
                 #...       
 
             if CasinoEnum.PULSZ.value in casino_list and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("password")) >  0:
-                print("Pulsz")
                 #Run Pulsz claim
                 pulsz = Pulsz(CONFIGURATION.get(CasinoEnum.PULSZ.value))
                 pulsz.testPulszClaim()       
