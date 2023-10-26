@@ -1,6 +1,6 @@
 # Brute Force Casino
 
-## Requirements
+## Requirements 
 
 `Python 3.10.0` or greater
 [https://www.python.org/downloads/release/python-3100/]
