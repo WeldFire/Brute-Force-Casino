@@ -4,6 +4,8 @@ from utils import get_active_window_title
 import time
 import logging
 import requests
+import re
+import os
 
 
 browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
@@ -90,3 +92,17 @@ def wait_for_any_image_to_exist(img_paths, max_tries=-1, delay=0.1):
             max_tries = max_tries - 1
 
     return found_location, found_image        
+
+
+def report_failure(logging_prefix, screenshot_name, message):
+    logging.error(f"{logging_prefix}{message}")
+    pyautogui.screenshot(screenshot_name)
+    logging.error(f"{logging_prefix}Saving debugging screenshot to {screenshot_name}")
+    return False
+
+
+def to_stub(s):
+    s = s.lower() # make all characters lowercase
+    s = re.sub(r'\W+', ' ', s) # replaces any non-alphanumeric character to a space
+    s = s.replace(' ', '_') # replaces spaces with underscores
+    return s

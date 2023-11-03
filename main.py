@@ -1,6 +1,10 @@
 import os
 import pyautogui
 import time
+from Casinos.Chanced import Chanced
+from Casinos.High5 import High5
+from Casinos.Modo import Modo
+from Casinos.Zula import Zula
 import pytesseract
 import subprocess
 from pyppeteer import connect, launch
@@ -855,9 +859,9 @@ async def main(schedule = RunSchedule.All):
             #Check if each of the Enums exist in the key list, so we know if the configuration has been fileld out
 
             if CasinoEnum.CHANCED.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("password")) >  0:
-                print("Chanced")
                 #Run Chanced claim
-                #...
+                chanced = Chanced(CONFIGURATION.get(CasinoEnum.CHANCED.value))
+                chanced.testChancedClaim()
 
             if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
                 #Run Chumba claim
@@ -875,9 +879,9 @@ async def main(schedule = RunSchedule.All):
                 fortunecoins.testFortuneCoinsClaim()   
 
             if CasinoEnum.ZULA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("password")) >  0:
-                print("Zula")
                 #Run Zula claim
-                #...       
+                zula = Zula(CONFIGURATION.get(CasinoEnum.ZULA.value))
+                zula.testZulaClaim()
 
             if CasinoEnum.PULSZ.value in casino_list and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("password")) >  0:
                 #Run Pulsz claim
@@ -885,14 +889,14 @@ async def main(schedule = RunSchedule.All):
                 pulsz.testPulszClaim()       
             
             if CasinoEnum.HIGH5.value in casino_list and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("password")) >  0:
-                print("High 5")
                 #Run High 5 claim
-                #...  
+                high5 = High5(CONFIGURATION.get(CasinoEnum.HIGH5.value))
+                high5.testHigh5Claim()
 
             if CasinoEnum.MODO.value in casino_list and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("password")) >  0:
-                print("Modo")
                 #Run Modo claim
-                #...                 
+                modo = Modo(CONFIGURATION.get(CasinoEnum.MODO.value))
+                modo.testModoClaim()          
 
             #await claimChumba()
             #await claimPulsz()
