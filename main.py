@@ -1,4 +1,5 @@
 import os
+import sys
 import pyautogui
 import time
 import pytesseract
@@ -17,6 +18,9 @@ class RunSchedule(Enum):
   SixHours = 6
   EveryHour = 1
   All = 0
+
+  def isCompatibleWithRunSchedule(self, testedRunSchedule):
+      return testedRunSchedule == RunSchedule.All or testedRunSchedule == self
 
 
 CONFIG_BASE = "BASE"
@@ -384,7 +388,7 @@ async def claimLuckylandslots():
     base_path = "imgs/luckyland/"
     # Use the functions
     browser, page = await start_browser("https://luckylandslots.com/loader")
-    start_login_location = wait_for_image(base_path+"start-login.png", 20)
+    start_login_location = wait_for_image(base_path+"start-login.png", 50)
     
     if start_login_location:
         print("Looks like we need to login to lucky land!")
@@ -649,6 +653,8 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
             return report_failure(logging_prefix, f"{name_stub}_start_login_fail.png", f"Unable to find the login button to start the login process for some reason!")
             
         click_location(start_login_button)
+        time.sleep(0.2) # TODO this is a silly fix for High5 Casino :/ Make more generic in the future
+        click_location(start_login_button)
         
         # OPTIONAL - Try to find login selector if it was defined
         login_selection_image = base_path+"login_selection.png"
@@ -830,7 +836,7 @@ async def main(schedule = RunSchedule.All):
         logging.warn("Base configuration health check url wasn't defined so its ping will be skipped")
         
     try:        
-        if(schedule == RunSchedule.All or schedule == RunSchedule.SixHours):
+        if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
             await claimChumba()
             await claimPulsz()
             await claimLuckylandslots()
@@ -839,7 +845,7 @@ async def main(schedule = RunSchedule.All):
             await claimHigh5()
             await claimModo()
         
-        if(schedule == RunSchedule.All or schedule == RunSchedule.EveryHour):
+        if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
             await claimChancedV2()
     except KeyboardInterrupt:
         pass
@@ -856,11 +862,22 @@ def startup(schedule = RunSchedule.All):
 CONFIGURATION = load_configuration()
 
 if __name__ ==  '__main__':
-    startup()
+    run_schedule = RunSchedule.All
+    if len(sys.argv) > 1:
+        run_schedule_raw = sys.argv[1].lower()
+        if run_schedule_raw == "hourly":
+            run_schedule = RunSchedule.EveryHour
+        elif run_schedule_raw == "six-hours":
+            run_schedule = RunSchedule.SixHours
+
+    startup(run_schedule)
     
     scheduler = BackgroundScheduler()
-    scheduler.add_job(lambda schedule = RunSchedule.EveryHour: startup(schedule), 'interval', hours=1, minutes=2)
-    scheduler.add_job(lambda schedule = RunSchedule.SixHours:  startup(schedule), 'interval', hours=6, minutes=2)
+    if(RunSchedule.EveryHour.isCompatibleWithRunSchedule(run_schedule)):
+        scheduler.add_job(lambda schedule = RunSchedule.EveryHour: startup(schedule), 'interval', hours=1, minutes=2)
+
+    if(RunSchedule.SixHours.isCompatibleWithRunSchedule(run_schedule)):
+        scheduler.add_job(lambda schedule = RunSchedule.SixHours:  startup(schedule), 'interval', hours=6, minutes=2)
     
     scheduler.start()
     
