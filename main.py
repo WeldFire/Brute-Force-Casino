@@ -60,6 +60,7 @@ async def start_browser(url):
     # page = (await browser.pages())[-1]
     browser = MockBrowser()
     page = None
+    time.sleep(5) # Sleeping because Opera GX plays the dumb loading animation even though I turned it off.....
     return browser, page
 
 def wait_for_any_image_to_exist(img_paths, max_tries=-1, delay=0.1):
@@ -186,7 +187,7 @@ async def claimChumba():
     else:
         print("ERROR Wasn't able to start up!! (Browser not on the main window?)")
         
-    await browser.close()
+    # await browser.close()
 
 
 async def getPulszSCBalance(page):
@@ -281,13 +282,14 @@ async def navigateToChancedClaim(base_path, browser, page):
     time.sleep(3)
     
 async def claimChancedV2():
-    return await genericClaim(
-            name="Chanced",
-            base_path="imgs/chanced/",
-            base_url="https://www.chanced.com",
-            customNavigateToClaim=navigateToChancedClaim,
-            claimAvailableClickOffset={'x':0, 'y':200}
-        )
+    await genericClaim(
+        name="Chanced",
+        base_path="imgs/chanced/",
+        base_url="https://www.chanced.com",
+        customNavigateToClaim=navigateToChancedClaim,
+        claimAvailableClickOffset={'x':0, 'y':200}
+    )
+    await MockBrowser().close()
 
 async def claimChanced():
     name = "Chanced"
@@ -653,8 +655,6 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
             return report_failure(logging_prefix, f"{name_stub}_start_login_fail.png", f"Unable to find the login button to start the login process for some reason!")
             
         click_location(start_login_button)
-        time.sleep(0.2) # TODO this is a silly fix for High5 Casino :/ Make more generic in the future
-        click_location(start_login_button)
         
         # OPTIONAL - Try to find login selector if it was defined
         login_selection_image = base_path+"login_selection.png"
@@ -762,7 +762,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     logging.info(f"{logging_prefix}Finished checking claim, wrapping up")
     
     logging.info(f"{logging_prefix}Attempting to close browser")
-    await browser.close()
+    # await browser.close()
 
 async def navigateToHigh5Claim(base_path, browser, page):
     # Is bonus_popup_open.png ?
