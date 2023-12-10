@@ -1,4 +1,5 @@
 import os
+import sys
 import pyautogui
 import time
 from Casinos.Chanced import Chanced
@@ -33,6 +34,9 @@ class RunSchedule(Enum):
   SixHours = 6
   EveryHour = 1
   All = 0
+
+  def isCompatibleWithRunSchedule(self, testedRunSchedule):
+      return testedRunSchedule == RunSchedule.All or testedRunSchedule == self
 
 
 #CONFIG_BASE = "BASE"
@@ -72,6 +76,7 @@ async def start_browser(url):
     # page = (await browser.pages())[-1]
     browser = MockBrowser()
     page = None
+    time.sleep(5) # Sleeping because Opera GX plays the dumb loading animation even though I turned it off.....
     return browser, page
 
 def wait_for_any_image_to_exist(img_paths, max_tries=-1, delay=0.1):
@@ -198,7 +203,7 @@ async def claimChumba():
     else:
         print("ERROR Wasn't able to start up!! (Browser not on the main window?)")
         
-    await browser.close()
+    # await browser.close()
 
 
 async def getPulszSCBalance(page):
@@ -293,13 +298,14 @@ async def navigateToChancedClaim(base_path, browser, page):
     time.sleep(3)
     
 async def claimChancedV2():
-    return await genericClaim(
-            name="Chanced",
-            base_path="imgs/chanced/",
-            base_url="https://www.chanced.com",
-            customNavigateToClaim=navigateToChancedClaim,
-            claimAvailableClickOffset={'x':0, 'y':200}
-        )
+    await genericClaim(
+        name="Chanced",
+        base_path="imgs/chanced/",
+        base_url="https://www.chanced.com",
+        customNavigateToClaim=navigateToChancedClaim,
+        claimAvailableClickOffset={'x':0, 'y':200}
+    )
+    await MockBrowser().close()
 
 async def claimChanced():
     name = "Chanced"
@@ -400,7 +406,7 @@ async def claimLuckylandslots():
     base_path = "imgs/luckyland/"
     # Use the functions
     browser, page = await start_browser("https://luckylandslots.com/loader")
-    start_login_location = wait_for_image(base_path+"start-login.png", 20)
+    start_login_location = wait_for_image(base_path+"start-login.png", 50)
     
     if start_login_location:
         print("Looks like we need to login to lucky land!")
@@ -772,7 +778,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     logging.info(f"{logging_prefix}Finished checking claim, wrapping up")
     
     logging.info(f"{logging_prefix}Attempting to close browser")
-    await browser.close()
+    # await browser.close()
 
 async def navigateToHigh5Claim(base_path, browser, page):
     # Is bonus_popup_open.png ?
@@ -850,19 +856,13 @@ async def main(schedule = RunSchedule.All):
         logging.warn("Base configuration health check url wasn't defined so its ping will be skipped")
         
     try:        
-        if(schedule == RunSchedule.All or schedule == RunSchedule.SixHours):
+        if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
             
             #Get all of the keys from the config, which should match the enum values from CasinoEnum
             casino_list = list(CONFIGURATION.keys())
         
 
             #Check if each of the Enums exist in the key list, so we know if the configuration has been fileld out
-
-            if CasinoEnum.CHANCED.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("password")) >  0:
-                #Run Chanced claim
-                chanced = Chanced(CONFIGURATION.get(CasinoEnum.CHANCED.value))
-                chanced.testChancedClaim()
-
             if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
                 #Run Chumba claim
                 chumba = Chumba(CONFIGURATION.get(CasinoEnum.CHUMBA.value))
@@ -898,13 +898,24 @@ async def main(schedule = RunSchedule.All):
                 modo = Modo(CONFIGURATION.get(CasinoEnum.MODO.value))
                 modo.testModoClaim()          
 
-            #await claimChumba()
-            #await claimPulsz()
-            #await claimLuckylandslots()
-            #await claimFortuneCoinsV2()
-            #await claimZula()
-            #await claimHigh5()
-            #await claimModo()
+        #if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
+        #    await claimChumba()
+        #    await claimPulsz()
+        #    await claimLuckylandslots()
+        #    await claimFortuneCoinsV2()
+        #    await claimZula()
+        #    await claimHigh5()
+        #    await claimModo()
+        
+        if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
+            #await claimChancedV2()
+
+            if CasinoEnum.CHANCED.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("password")) >  0:
+            #Run Chanced claim
+            chanced = Chanced(CONFIGURATION.get(CasinoEnum.CHANCED.value))
+            chanced.testChancedClaim()
+
+            
     except KeyboardInterrupt:
         pass
         
@@ -920,11 +931,22 @@ def startup(schedule = RunSchedule.All):
 CONFIGURATION = load_configuration()
 
 if __name__ ==  '__main__':
-    startup()
+    run_schedule = RunSchedule.All
+    if len(sys.argv) > 1:
+        run_schedule_raw = sys.argv[1].lower()
+        if run_schedule_raw == "hourly":
+            run_schedule = RunSchedule.EveryHour
+        elif run_schedule_raw == "six-hours":
+            run_schedule = RunSchedule.SixHours
+
+    startup(run_schedule)
     
     scheduler = BackgroundScheduler()
-    scheduler.add_job(lambda schedule = RunSchedule.EveryHour: startup(schedule), 'interval', hours=1, minutes=2)
-    scheduler.add_job(lambda schedule = RunSchedule.SixHours:  startup(schedule), 'interval', hours=6, minutes=2)
+    if(RunSchedule.EveryHour.isCompatibleWithRunSchedule(run_schedule)):
+        scheduler.add_job(lambda schedule = RunSchedule.EveryHour: startup(schedule), 'interval', hours=1, minutes=2)
+
+    if(RunSchedule.SixHours.isCompatibleWithRunSchedule(run_schedule)):
+        scheduler.add_job(lambda schedule = RunSchedule.SixHours:  startup(schedule), 'interval', hours=6, minutes=2)
     
     scheduler.start()
     
