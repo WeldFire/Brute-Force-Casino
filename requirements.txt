@@ -7,3 +7,4 @@ asyncio
 requests
 apscheduler
 psutil
+opencv-python
