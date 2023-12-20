@@ -50,10 +50,10 @@ class RunSchedule(Enum):
 logging = logging.getLogger(__name__)
 
 
-# browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
-# browser_title_fragment = " - Brave"
-browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
-browser_title_fragment = " - Opera"
+browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
+browser_title_fragment = " - Brave"
+# browser_path = r'C:\\Users\\kenaw\\AppData\\Local\\Programs\\Opera GX\\launcher.exe'
+# browser_title_fragment = " - Opera"
 # browser_path = r'firefox'
 # browser_title_fragment = " - Mozilla Firefox"
 
@@ -866,7 +866,7 @@ async def main(schedule = RunSchedule.All):
             if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
                 #Run Chumba claim
                 chumba = Chumba(CONFIGURATION.get(CasinoEnum.CHUMBA.value))
-                chumba.testChumbaClaim()
+                await chumba.claimChumba()
             
             if CasinoEnum.LUCKYLAND.value in casino_list and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("password")) >  0:
                 #Run Lucky Land claim
@@ -911,9 +911,9 @@ async def main(schedule = RunSchedule.All):
             #await claimChancedV2()
 
             if CasinoEnum.CHANCED.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("password")) >  0:
-            #Run Chanced claim
-            chanced = Chanced(CONFIGURATION.get(CasinoEnum.CHANCED.value))
-            chanced.testChancedClaim()
+                #Run Chanced claim
+                chanced = Chanced(CONFIGURATION.get(CasinoEnum.CHANCED.value))
+                chanced.testChancedClaim()
 
             
     except KeyboardInterrupt:

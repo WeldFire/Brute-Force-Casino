@@ -8,8 +8,8 @@ import re
 import os
 
 
-browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
-browser_title_fragment = " - Opera"
+browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
+browser_title_fragment = " - Brave"
 
 class MockBrowser:
     async def close(self):
@@ -33,6 +33,7 @@ async def start_browser(url):
     return browser, page
 
 def wait_for_image(img_path, max_tries=-1, delay=0.1, confidence=0.9):
+    print(f"Image: {img_path}")
     found_location = None
     while max_tries != 0:
         location = find_image(img_path, confidence)
