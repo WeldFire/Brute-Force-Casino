@@ -48,6 +48,7 @@ def wait_for_image(img_path, max_tries=-1, delay=0.1, confidence=0.9):
     return found_location
 
 def find_image(image_file_path, confidence=0.9, minSearchTime=0):
+    print(f"image: {image_file_path}")
     # Use image recognition to locate elements on the page
     location = pyautogui.locateOnScreen(image_file_path, minSearchTime, confidence=confidence)
     if location:

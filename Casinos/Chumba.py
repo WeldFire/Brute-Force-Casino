@@ -1,5 +1,6 @@
 import pyautogui
 import logging
+import time
 
 from Helpers.BrowserHelpers import start_browser
 from Helpers.BrowserHelpers import find_image
@@ -51,8 +52,9 @@ class Chumba:
             pyautogui.typewrite(self.CONFIGURATION[CONFIG_USERNAME])
             click_location(location)
             
-            claim_img_path = base_path+"claim.png"
+            claim_img_path = base_path+"claim2.png"
             noclaim_img_path = base_path+"noclaim.png"
+            time.sleep(6)
             loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 50)
             
             
@@ -62,7 +64,7 @@ class Chumba:
                 else:
                     logging.warn(f"No health check run url defined for {name}")
                 #Adjust for looking at the close button
-                click_point(loaded_location.left+(loaded_location.width/2), loaded_location.top-45+(loaded_location.height/2))
+                click_point(loaded_location.left+(loaded_location.width/2), loaded_location.top+(loaded_location.height/2))
                 if CONFIG_HEALTH_CLAIM in self.CONFIGURATION:
                     ping(self.CONFIGURATION[CONFIG_HEALTH_CLAIM])
                 else:
@@ -75,8 +77,8 @@ class Chumba:
                     ping(self.CONFIGURATION[CONFIG_HEALTH_RUN])
                 else:
                     logging.warn(f"No health check run url defined for {name}")
-                balance = await self.getChumbaSCBalance(page)
-                print(f"Current Chumba Balance is {balance}")
+                #balance = await self.getChumbaSCBalance(page)
+                #print(f"Current Chumba Balance is {balance}")
             else:
                 # take a screenshot of the entire screen
                 screenshot_name = "chumba_login_fail.png"
