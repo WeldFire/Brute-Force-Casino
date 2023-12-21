@@ -8,8 +8,8 @@ import re
 import os
 
 
-browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
-browser_title_fragment = " - Brave"
+browser_path = r"C:\\Users\\kenaw\\AppData\\Local\\Programs\\Opera GX\\launcher.exe"
+browser_title_fragment = " - Opera"
 
 class MockBrowser:
     async def close(self):
@@ -30,10 +30,10 @@ async def start_browser(url):
     # page = (await browser.pages())[-1]
     browser = MockBrowser()
     page = None
+    time.sleep(5) # Sleeping because Opera GX plays the dumb loading animation even though I turned it off.....
     return browser, page
 
 def wait_for_image(img_path, max_tries=-1, delay=0.1, confidence=0.9):
-    print(f"Image: {img_path}")
     found_location = None
     while max_tries != 0:
         location = find_image(img_path, confidence)
