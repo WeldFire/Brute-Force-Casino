@@ -2,6 +2,10 @@ import os
 import sys
 import pyautogui
 import time
+from Casinos.Chanced import Chanced
+from Casinos.High5 import High5
+from Casinos.Modo import Modo
+from Casinos.Zula import Zula
 import pytesseract
 import subprocess
 from pyppeteer import connect, launch
@@ -10,9 +14,21 @@ import requests
 import logging
 import re
 from apscheduler.schedulers.background import BackgroundScheduler
+from enums.CasinoEnum import CasinoEnum
 from utils import get_active_window_title
 from enum import Enum
+from Casinos.Chumba import Chumba
+from Casinos.Pulsz import Pulsz
+from Casinos.LuckyLand import LuckyLand
+from Casinos.FortuneCoins import FortuneCoins
 import json
+
+from Configuration import CONFIG_BASE
+from Configuration import CONFIG_USERNAME
+from Configuration import CONFIG_PASSWORD
+from Configuration import CONFIG_HEALTH_RUN
+from Configuration import CONFIG_HEALTH_CLAIM
+from Configuration import CONFIG_HEALTH_CHECK_TOOL_RUNNING
     
 class RunSchedule(Enum):
   SixHours = 6
@@ -23,21 +39,21 @@ class RunSchedule(Enum):
       return testedRunSchedule == RunSchedule.All or testedRunSchedule == self
 
 
-CONFIG_BASE = "BASE"
-CONFIG_USERNAME="username"
-CONFIG_PASSWORD="password"
-CONFIG_HEALTH_RUN="health_check_successful_run"
-CONFIG_HEALTH_CLAIM="health_check_successful_claim"
-CONFIG_HEALTH_CHECK_TOOL_RUNNING = "health_check_tool_running"
+#CONFIG_BASE = "BASE"
+#CONFIG_USERNAME="username"
+#CONFIG_PASSWORD="password"
+#CONFIG_HEALTH_RUN="health_check_successful_run"
+#CONFIG_HEALTH_CLAIM="health_check_successful_claim"
+#CONFIG_HEALTH_CHECK_TOOL_RUNNING = "health_check_tool_running"
 
 # logging.basicConfig(level=logging.DEBUG)
 logging = logging.getLogger(__name__)
 
 
-# browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
-# browser_title_fragment = " - Brave"
-browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
-browser_title_fragment = " - Opera"
+browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
+browser_title_fragment = " - Brave"
+# browser_path = r'C:\\Users\\kenaw\\AppData\\Local\\Programs\\Opera GX\\launcher.exe'
+# browser_title_fragment = " - Opera"
 # browser_path = r'firefox'
 # browser_title_fragment = " - Mozilla Firefox"
 
@@ -829,6 +845,10 @@ async def claimModo():
         )
 
 
+
+def testChumbaClaim(self):
+    print("test chumba claim")
+
 async def main(schedule = RunSchedule.All):
     if (CONFIG_BASE in CONFIGURATION and CONFIG_HEALTH_CHECK_TOOL_RUNNING in CONFIGURATION[CONFIG_BASE]):
         ping(CONFIGURATION[CONFIG_BASE][CONFIG_HEALTH_CHECK_TOOL_RUNNING])
@@ -837,16 +857,65 @@ async def main(schedule = RunSchedule.All):
         
     try:        
         if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
-            await claimChumba()
-            await claimPulsz()
-            await claimLuckylandslots()
-            await claimFortuneCoinsV2()
-            await claimZula()
-            await claimHigh5()
-            await claimModo()
+            
+            #Get all of the keys from the config, which should match the enum values from CasinoEnum
+            casino_list = list(CONFIGURATION.keys())
+        
+
+            #Check if each of the Enums exist in the key list, so we know if the configuration has been fileld out
+            if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
+                #Run Chumba claim
+                chumba = Chumba(CONFIGURATION.get(CasinoEnum.CHUMBA.value))
+                await chumba.claimChumba()
+            
+            if CasinoEnum.LUCKYLAND.value in casino_list and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("password")) >  0:
+                #Run Lucky Land claim
+                luckyland = LuckyLand(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value))
+                luckyland.testLuckyLandClaim()
+
+            if CasinoEnum.FORTUNECOINS.value in casino_list and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("password")) >  0:
+                #Run Fotune Coins claim
+                fortunecoins = FortuneCoins(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value))
+                fortunecoins.testFortuneCoinsClaim()   
+
+            if CasinoEnum.ZULA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("password")) >  0:
+                #Run Zula claim
+                zula = Zula(CONFIGURATION.get(CasinoEnum.ZULA.value))
+                zula.testZulaClaim()
+
+            if CasinoEnum.PULSZ.value in casino_list and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("password")) >  0:
+                #Run Pulsz claim
+                pulsz = Pulsz(CONFIGURATION.get(CasinoEnum.PULSZ.value))
+                pulsz.testPulszClaim()       
+            
+            if CasinoEnum.HIGH5.value in casino_list and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("password")) >  0:
+                #Run High 5 claim
+                high5 = High5(CONFIGURATION.get(CasinoEnum.HIGH5.value))
+                high5.testHigh5Claim()
+
+            if CasinoEnum.MODO.value in casino_list and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("password")) >  0:
+                #Run Modo claim
+                modo = Modo(CONFIGURATION.get(CasinoEnum.MODO.value))
+                modo.testModoClaim()          
+
+        #if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
+        #    await claimChumba()
+        #    await claimPulsz()
+        #    await claimLuckylandslots()
+        #    await claimFortuneCoinsV2()
+        #    await claimZula()
+        #    await claimHigh5()
+        #    await claimModo()
         
         if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
-            await claimChancedV2()
+            #await claimChancedV2()
+
+            if CasinoEnum.CHANCED.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("password")) >  0:
+                #Run Chanced claim
+                chanced = Chanced(CONFIGURATION.get(CasinoEnum.CHANCED.value))
+                chanced.testChancedClaim()
+
+            
     except KeyboardInterrupt:
         pass
         
@@ -888,3 +957,10 @@ if __name__ ==  '__main__':
     except (KeyboardInterrupt, SystemExit):
         logging.warning('Got SIGTERM! Terminating...')
         scheduler.shutdown(wait=False)
+
+
+
+#TODO: move browser.exe (browser_path) to config json
+#TODO: move and update browser_title_fragment = " - Opera" to config, if not using Opera, chrome is "- Google Chrome"
+#TODO: Move each casino functions to it's own class
+#TODO: Move urls to config.json or to casinos.json, create a new one
