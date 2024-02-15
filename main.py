@@ -868,7 +868,7 @@ async def main(schedule = RunSchedule.All):
             if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
                 #Run Chumba claim
                 chumba = Chumba(CONFIGURATION.get(CasinoEnum.CHUMBA.value))
-                await chumba.claimChumba()
+                #await chumba.claimChumba()
             
             if CasinoEnum.LUCKYLAND.value in casino_list and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("password")) >  0:
                 #Run Lucky Land claim

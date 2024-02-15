@@ -1,6 +1,7 @@
 from enum import Enum
 
 class CasinoEnum(Enum):
+    GLOBALPOKER="Global Poker"
     CHUMBA = "Chumba"
     CHANCED = "Chanced"
     LUCKYLAND = "Lucky Land"
