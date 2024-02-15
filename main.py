@@ -50,10 +50,12 @@ class RunSchedule(Enum):
 logging = logging.getLogger(__name__)
 
 
-browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
-browser_title_fragment = " - Brave"
+#browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
+#browser_title_fragment = " - Brave"
 # browser_path = r'C:\\Users\\kenaw\\AppData\\Local\\Programs\\Opera GX\\launcher.exe'
 # browser_title_fragment = " - Opera"
+browser_path = r'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+browser_title_fragment = " - Google Chrome"
 # browser_path = r'firefox'
 # browser_title_fragment = " - Mozilla Firefox"
 

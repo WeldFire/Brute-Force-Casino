@@ -8,8 +8,11 @@ import re
 import os
 
 
-browser_path = r"C:\\Users\\kenaw\\AppData\\Local\\Programs\\Opera GX\\launcher.exe"
-browser_title_fragment = " - Opera"
+#browser_path = r"C:\\Users\\kenaw\\AppData\\Local\\Programs\\Opera GX\\launcher.exe"
+#browser_title_fragment = " - Opera"
+
+browser_path = r'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+browser_title_fragment = " - Google Chrome"
 
 class MockBrowser:
     async def close(self):
