@@ -13,6 +13,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from utils import get_active_window_title
 from enum import Enum
 import json
+from pywinauto.findwindows    import find_window
+from win32gui import ShowWindow
+import win32con
+
+def moduleExists(module):
+    return (module in sys.modules) and (module in dir())
     
 class RunSchedule(Enum):
   SixHours = 6
@@ -51,6 +57,15 @@ class MockBrowser:
         if(browser_title_fragment in windowTitle):
             # pyautogui.hotkey('ctrl', 'w') # Close the tab
             pyautogui.hotkey('alt', 'f4')
+            
+    async def focus(self):
+        if moduleExists(win32con):
+            ShowWindow(find_window(title_re=f".*?{browser_title_fragment}"), win32con.SW_MAXIMIZE)
+            
+    async def minimize(self):
+        if moduleExists(win32con):
+            ShowWindow(find_window(title_re=f".*?{browser_title_fragment}"), win32con.SW_MINIMIZE)
+        
 
 
 async def start_browser(url):
@@ -61,6 +76,7 @@ async def start_browser(url):
     browser = MockBrowser()
     page = None
     time.sleep(5) # Sleeping because Opera GX plays the dumb loading animation even though I turned it off.....
+    await browser.focus()
     return browser, page
 
 def wait_for_any_image_to_exist(img_paths, max_tries=-1, delay=0.1):
@@ -109,8 +125,13 @@ def click_point(x, y):
 
 
 def find_image(image_file_path, confidence=0.9, minSearchTime=0):
-    # Use image recognition to locate elements on the page
-    location = pyautogui.locateOnScreen(image_file_path, minSearchTime, confidence=confidence)
+    location = None
+    try:
+        # Use image recognition to locate elements on the page
+        location = pyautogui.locateOnScreen(image_file_path, minSearchTime, confidence=confidence)
+    except pyautogui.ImageNotFoundException:
+        pass
+    
     if location:
         logging.debug(f"Location of the image is: {location}")
     # else:
@@ -289,7 +310,9 @@ async def claimChancedV2():
         customNavigateToClaim=navigateToChancedClaim,
         claimAvailableClickOffset={'x':0, 'y':200}
     )
-    await MockBrowser().close()
+    # await MockBrowser().close()
+    await MockBrowser().minimize()
+
 
 async def claimChanced():
     name = "Chanced"
@@ -785,16 +808,16 @@ async def navigateToHigh5Claim(base_path, browser, page):
 
 async def navigateToZulaClaim(base_path, browser, page):
     # close_modal.png
-    close_modal = wait_for_image(base_path+"close_modal.png")
+    close_modal = wait_for_image(base_path+"close_modal.png", 500)
     if close_modal:
         click_location(close_modal)
     
     # coin_store.png
-    coin_store = wait_for_image(base_path+"coin_store.png")
+    coin_store = wait_for_image(base_path+"coin_store.png", 500)
     click_location(coin_store)
         
     # confirm_at_claim_page.png
-    confirm_at_claim_page = wait_for_image(base_path+"confirm_at_claim_page.png")
+    confirm_at_claim_page = wait_for_image(base_path+"confirm_at_claim_page.png", 500)
     if not confirm_at_claim_page:
         return report_failure("Zula Claim Navigation", f"zula_claim_tab_navigation_fail.png", f"Unable to ensure that we were able to open the claim model correctly")
 
@@ -845,8 +868,8 @@ async def main(schedule = RunSchedule.All):
             await claimHigh5()
             await claimModo()
         
-        if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
-            await claimChancedV2()
+        # if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
+        #     await claimChancedV2()
     except KeyboardInterrupt:
         pass
         
