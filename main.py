@@ -788,6 +788,11 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     # await browser.close()
 
 async def navigateToHigh5Claim(base_path, browser, page):
+    browser_privacy_okay = wait_for_image(base_path+"browser_privacy_okay.png", 50)
+    if browser_privacy_okay:
+        click_location(browser_privacy_okay)
+    
+    
     # Is bonus_popup_open.png ?
     bonus_popup_open = wait_for_image(base_path+"bonus_popup_open.png", 20)
     if not bonus_popup_open:    
@@ -857,7 +862,7 @@ async def main(schedule = RunSchedule.All):
         ping(CONFIGURATION[CONFIG_BASE][CONFIG_HEALTH_CHECK_TOOL_RUNNING])
     else:
         logging.warn("Base configuration health check url wasn't defined so its ping will be skipped")
-        
+    
     try:        
         if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
             await claimChumba()
