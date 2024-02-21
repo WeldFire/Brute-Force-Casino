@@ -791,28 +791,43 @@ async def navigateToHigh5Claim(base_path, browser, page):
     browser_privacy_okay = wait_for_image(base_path+"browser_privacy_okay.png", 50)
     if browser_privacy_okay:
         click_location(browser_privacy_okay)
+
+    # Decline cookies
+    decline_cookies = wait_for_image(base_path+"decline_cookies.png", 50)
+    if decline_cookies:
+        click_location(decline_cookies)
     
+    browser_continue = wait_for_image(base_path+"continue.png", 50)
+    if browser_continue:
+        click_location(browser_continue)
     
     # Is bonus_popup_open.png ?
     bonus_popup_open = wait_for_image(base_path+"bonus_popup_open.png", 20)
-    if not bonus_popup_open:    
+    if not bonus_popup_open:
+        print("It doesn't look like the bonus popup is open")
         # Open bonus_popup.png
-        bonus_popup = wait_for_image(base_path+"bonus_popup.png", 20)
+        bonus_popup = wait_for_image(base_path+"bonus_popup.png", 50)
         if not bonus_popup:
             return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_navigation_fail.png", f"Unable to open the bonus popup window!")
             
         click_location(bonus_popup)
         
         # Is bonus_popup_open.png now?
-        bonus_popup_open_confirmation = wait_for_image(base_path+"bonus_popup_open.png", 20)
+        bonus_popup_open_confirmation = wait_for_image(base_path+"bonus_popup_open.png", 200)
         if not bonus_popup_open_confirmation:    
             return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_confirmation_fail.png", f"Unable to confirm the popup is open!")
+    print("Bonus popup should be open now")
     
     
     
 
 async def navigateToZulaClaim(base_path, browser, page):
     # close_modal.png
+    close_modal = wait_for_image(base_path+"close_modal.png", 500)
+    if close_modal:
+        click_location(close_modal)
+
+    # close second modal if it exists
     close_modal = wait_for_image(base_path+"close_modal.png", 500)
     if close_modal:
         click_location(close_modal)
