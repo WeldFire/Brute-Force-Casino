@@ -1,4 +1,5 @@
 import json
+from Casinos.Chumba import Chumba
 from enums.CasinoEnum import CasinoEnum
 from Casinos.GlobalPoker import GlobalPoker
 import asyncio
@@ -26,9 +27,13 @@ def load_configuration():
     return map_var
 
 async def main(schedule = RunSchedule.All):
-    print('here')
-    gp = GlobalPoker(CONFIGURATION.get(CasinoEnum.GLOBALPOKER.value))
-    await gp.claim()
+    #gp = GlobalPoker(CONFIGURATION.get(CasinoEnum.GLOBALPOKER.value))
+    #await gp.claim()
+
+    #TODO: on hold until I can figure out how to intercept emails to get the code then fill it in
+    chumba = Chumba(CONFIGURATION.get(CasinoEnum.CHUMBA.value))
+    await chumba.claimChumba2()
+
 
 
 

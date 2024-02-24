@@ -41,15 +41,11 @@ class GlobalPoker(Casino):
         # initializing webdriver for Chrome with our options 
         driver = webdriver.Chrome(options=options) 
         
-        # getting GeekForGeeks webpage 
+        # getting global poker webpage 
         driver.get('https://play.globalpoker.com/')
 
-
-
-
-        #get current value, to compare later to make sure we actually claimed - otherwise send email / error that claim did not happen
-
         sleep(5)
+
         XPATH_username='//*[@id="1-email"]'
         XPATH_password='//*[@id="auth0-lock-container-1"]/div/div[2]/form/div/div/div/div[2]/div[2]/span/div/div/div/div/div/div/div/div/div[2]/div[3]/div[2]/div/div/input'
         driver.find_element(By.XPATH,XPATH_username).send_keys(self.CONFIGURATION[CONFIG_USERNAME])
@@ -63,6 +59,9 @@ class GlobalPoker(Casino):
         sleep(5)
 
 
+        #get current value, to compare later to make sure we actually claimed - otherwise send email / error that claim did not happen
+        current_balance = driver.find_element(By.XPATH, '//*[@id="sc-balance-display"]/div/div/span[2]').text
+
         #click get coins
         button = '//*[@id="cashier-button"]'
         driver.find_element(By.XPATH,button).click()
@@ -72,16 +71,16 @@ class GlobalPoker(Casino):
         #Click all 7 tiles so we don't have to "guess" or keep track of which one is active
         for i in range(7):
             tile = '//*[@id="daily-bonus-'+str(i+1)+'"]'
-            print(tile)
+            driver.find_element(By.XPATH,tile).click()
+            sleep(1)
 
         
-        
-        # We can also get some information 
-        # about page in browser. 
-        # So let's output webpage title into 
-        # terminal to be sure that the browser 
-        # is actually running.  
-        print(driver.title) 
+        new_balance = driver.find_element(By.XPATH, '//*[@id="sc-balance-display"]/div/div/span[2]').text
+
+
+        if(current_balance == new_balance):
+            print('Error claiming - old value and new value are the same')
+            #TODO: send email or something
         
         # close browser after our manipulations 
         #driver.close() 

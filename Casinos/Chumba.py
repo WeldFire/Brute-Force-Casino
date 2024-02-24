@@ -116,46 +116,48 @@ class Chumba:
         driver = webdriver.Chrome(options=options) 
         
         # getting GeekForGeeks webpage 
-        driver.get('https://login.chumbacasino.com/')
-
-
-
-
-        #get current value, to compare later to make sure we actually claimed - otherwise send email / error that claim did not happen
+        driver.get('https://lobby.chumbacasino.com/')
 
         sleep(5)
-        XPATH_username='//*[@id="1-email"]'
-        XPATH_password='//*[@id="auth0-lock-container-1"]/div/div[2]/form/div/div/div/div[2]/div[2]/span/div/div/div/div/div/div/div/div/div[2]/div[3]/div[2]/div/div/input'
+        
+        #Get username field
+        XPATH_username='//*[@id="login_email-input"]'
+
+        #get password field
+        XPATH_password='//*[@id="login_password-input"]'
+
+        #Fill in username
         driver.find_element(By.XPATH,XPATH_username).send_keys(self.CONFIGURATION[CONFIG_USERNAME])
         sleep(2)
 
+        #Fill in password
         driver.find_element(By.XPATH,XPATH_password).send_keys(self.CONFIGURATION[CONFIG_PASSWORD])
         sleep(2)
 
-        button = '//*[@id="auth0-lock-container-1"]/div/div[2]/form/div/div/div/button'
+        #Click to login
+        button = '//*[@id="login_submit-button"]'
         driver.find_element(By.XPATH,button).click()
         sleep(5)
 
+        #TODO: upon login in a new browser / incognito mode chumba asks to verify ID via SMS or Email... maybe need to find a way to intercept this
 
-        #click get coins
-        button = '//*[@id="cashier-button"]'
+
+        #get current value, to compare later to make sure we actually claimed - otherwise send email / error that claim did not happen
+        current_balance = driver.find_element(By.XPATH, '//*[@id="top-hud__currency-bar__sweeps-currency-amount"]/div/span/span').text
+
+        #click claim button coins
+        button = '//*[@id="daily-bonus__claim-btn"]'
         driver.find_element(By.XPATH,button).click()
         sleep(3)
 
-
-        #Click all 7 tiles so we don't have to "guess" or keep track of which one is active
-        for i in range(7):
-            tile = '//*[@id="daily-bonus-'+str(i+1)+'"]'
-            print(tile)
-
         
-        
-        # We can also get some information 
-        # about page in browser. 
-        # So let's output webpage title into 
-        # terminal to be sure that the browser 
-        # is actually running.  
-        print(driver.title) 
+        new_balance = driver.find_element(By.XPATH, '//*[@id="top-hud__currency-bar__sweeps-currency-amount"]/div/span/span').text
+
+
+        if(current_balance == new_balance):
+            print('Error claiming - old value and new value are the same')
+            #TODO: send email or something
+
         
         # close browser after our manipulations 
         #driver.close() 
