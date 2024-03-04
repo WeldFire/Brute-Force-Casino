@@ -708,10 +708,24 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         click_location(email_field_location)
         pyautogui.typewrite(username)
         
+        #OPTIONAL - Try to click captcha        
+        captcha_enabled = os.path.isfile(base_path+"captcha.png")
+        if(captcha_enabled):
+            logging.info(f"{logging_prefix}Attempting to click captcha")
+            captcha_location = wait_for_image(base_path+"captcha.png", 20, 0.1)
+            if(not captcha_location):
+                return report_failure(logging_prefix, f"{name_stub}_locate_captcha_fail.png", f"Unable to find the captcha checkbox even though a captcha image was provided!")
+            click_location(captcha_location)
+            await asyncio.wait(5000)
+        
+        
         logging.info(f"{logging_prefix}Attempting to submit login information")
         login_button_location = wait_for_image(base_path+"submit_login.png", 20, 0.1, 0.8)
         if(not login_button_location):
-            return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason!")
+            if(captcha_enabled):
+                return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button, captcha is probably blocking us :(!")
+            else:
+                return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason!")
         click_location(login_button_location)
         
         logged_in = wait_for_image(login_not_required_path, 20)
