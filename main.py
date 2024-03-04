@@ -14,6 +14,12 @@ from utils import get_active_window_title
 from enum import Enum
 import json
 from enums.CasinoEnum import CasinoEnum
+from pywinauto.findwindows    import find_window
+from win32gui import ShowWindow
+import win32con
+
+def moduleExists(module):
+    return (module in sys.modules) and (module in dir())
     
 class RunSchedule(Enum):
   SixHours = 6
@@ -52,6 +58,15 @@ class MockBrowser:
         if(browser_title_fragment in windowTitle):
             # pyautogui.hotkey('ctrl', 'w') # Close the tab
             pyautogui.hotkey('alt', 'f4')
+            
+    async def focus(self):
+        if moduleExists(win32con):
+            ShowWindow(find_window(title_re=f".*?{browser_title_fragment}"), win32con.SW_MAXIMIZE)
+            
+    async def minimize(self):
+        if moduleExists(win32con):
+            ShowWindow(find_window(title_re=f".*?{browser_title_fragment}"), win32con.SW_MINIMIZE)
+        
 
 
 async def start_browser(url):
@@ -62,6 +77,7 @@ async def start_browser(url):
     browser = MockBrowser()
     page = None
     time.sleep(5) # Sleeping because Opera GX plays the dumb loading animation even though I turned it off.....
+    await browser.focus()
     return browser, page
 
 def wait_for_any_image_to_exist(img_paths, max_tries=-1, delay=0.1):
@@ -110,8 +126,13 @@ def click_point(x, y):
 
 
 def find_image(image_file_path, confidence=0.9, minSearchTime=0):
-    # Use image recognition to locate elements on the page
-    location = pyautogui.locateOnScreen(image_file_path, minSearchTime, confidence=confidence)
+    location = None
+    try:
+        # Use image recognition to locate elements on the page
+        location = pyautogui.locateOnScreen(image_file_path, minSearchTime, confidence=confidence)
+    except pyautogui.ImageNotFoundException:
+        pass
+    
     if location:
         logging.debug(f"Location of the image is: {location}")
     # else:
@@ -290,7 +311,9 @@ async def claimChancedV2():
         customNavigateToClaim=navigateToChancedClaim,
         claimAvailableClickOffset={'x':0, 'y':200}
     )
-    await MockBrowser().close()
+    # await MockBrowser().close()
+    await MockBrowser().minimize()
+
 
 async def claimChanced():
     name = "Chanced"
@@ -766,36 +789,56 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     # await browser.close()
 
 async def navigateToHigh5Claim(base_path, browser, page):
+    browser_privacy_okay = wait_for_image(base_path+"browser_privacy_okay.png", 50)
+    if browser_privacy_okay:
+        click_location(browser_privacy_okay)
+
+    # Decline cookies
+    decline_cookies = wait_for_image(base_path+"decline_cookies.png", 50)
+    if decline_cookies:
+        click_location(decline_cookies)
+    
+    browser_continue = wait_for_image(base_path+"continue.png", 50)
+    if browser_continue:
+        click_location(browser_continue)
+    
     # Is bonus_popup_open.png ?
     bonus_popup_open = wait_for_image(base_path+"bonus_popup_open.png", 20)
-    if not bonus_popup_open:    
+    if not bonus_popup_open:
+        print("It doesn't look like the bonus popup is open")
         # Open bonus_popup.png
-        bonus_popup = wait_for_image(base_path+"bonus_popup.png", 20)
+        bonus_popup = wait_for_image(base_path+"bonus_popup.png", 50)
         if not bonus_popup:
             return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_navigation_fail.png", f"Unable to open the bonus popup window!")
             
         click_location(bonus_popup)
         
         # Is bonus_popup_open.png now?
-        bonus_popup_open_confirmation = wait_for_image(base_path+"bonus_popup_open.png", 20)
+        bonus_popup_open_confirmation = wait_for_image(base_path+"bonus_popup_open.png", 200)
         if not bonus_popup_open_confirmation:    
             return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_confirmation_fail.png", f"Unable to confirm the popup is open!")
+    print("Bonus popup should be open now")
     
     
     
 
 async def navigateToZulaClaim(base_path, browser, page):
     # close_modal.png
-    close_modal = wait_for_image(base_path+"close_modal.png")
+    close_modal = wait_for_image(base_path+"close_modal.png", 500)
+    if close_modal:
+        click_location(close_modal)
+
+    # close second modal if it exists
+    close_modal = wait_for_image(base_path+"close_modal.png", 500)
     if close_modal:
         click_location(close_modal)
     
     # coin_store.png
-    coin_store = wait_for_image(base_path+"coin_store.png")
+    coin_store = wait_for_image(base_path+"coin_store.png", 500)
     click_location(coin_store)
         
     # confirm_at_claim_page.png
-    confirm_at_claim_page = wait_for_image(base_path+"confirm_at_claim_page.png")
+    confirm_at_claim_page = wait_for_image(base_path+"confirm_at_claim_page.png", 500)
     if not confirm_at_claim_page:
         return report_failure("Zula Claim Navigation", f"zula_claim_tab_navigation_fail.png", f"Unable to ensure that we were able to open the claim model correctly")
 
@@ -835,7 +878,7 @@ async def main(schedule = RunSchedule.All):
         ping(CONFIGURATION[CONFIG_BASE][CONFIG_HEALTH_CHECK_TOOL_RUNNING])
     else:
         logging.warn("Base configuration health check url wasn't defined so its ping will be skipped")
-        
+    
     try:        
         if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
 
@@ -871,13 +914,8 @@ async def main(schedule = RunSchedule.All):
                 #Run Modo claim
                 await claimModo()
         
-        if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
-            if CasinoEnum.CHANCED.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHANCED.value).get("password")) >  0:
-                #Run Chanced claim
-                await claimChancedV2()
-
-
-
+        # if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
+        #     await claimChancedV2()
     except KeyboardInterrupt:
         pass
         
