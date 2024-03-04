@@ -13,6 +13,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from utils import get_active_window_title
 from enum import Enum
 import json
+from enums.CasinoEnum import CasinoEnum
 from pywinauto.findwindows    import find_window
 from win32gui import ShowWindow
 import win32con
@@ -894,13 +895,38 @@ async def main(schedule = RunSchedule.All):
     
     try:        
         if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
-            await claimChumba()
-            await claimPulsz()
-            await claimLuckylandslots()
-            await claimFortuneCoinsV2()
-            await claimZula()
-            await claimHigh5()
-            await claimModo()
+
+            #Get all of the keys from the config, which should match the enum values from CasinoEnum
+            casino_list = list(CONFIGURATION.keys())
+            
+            #Check if each of the Enums exist in the key list, so we know if the configuration has been filled out
+            if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
+                #Run Chumba claim
+                await claimChumba()
+
+            if CasinoEnum.LUCKYLAND.value in casino_list and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("password")) >  0:
+                #Run Lucky Land claim
+                await claimLuckylandslots()
+
+            if CasinoEnum.FORTUNECOINS.value in casino_list and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("password")) >  0:
+                #Run Fotune Coins claim        
+                await claimFortuneCoinsV2()     
+
+            if CasinoEnum.ZULA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("password")) >  0:
+                #Run Zula claim
+                await claimZula()
+
+            if CasinoEnum.PULSZ.value in casino_list and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("password")) >  0:
+                #Run Pulsz claim
+                await claimPulsz()
+
+            if CasinoEnum.HIGH5.value in casino_list and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("password")) >  0:
+                #Run High 5 claim
+                await claimHigh5()
+
+            if CasinoEnum.MODO.value in casino_list and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("password")) >  0:
+                #Run Modo claim
+                await claimModo()
         
         # if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
         #     await claimChancedV2()
