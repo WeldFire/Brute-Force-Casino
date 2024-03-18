@@ -41,6 +41,16 @@ CONFIG_HEALTH_CHECK_TOOL_RUNNING = "health_check_tool_running"
 logging = logging.getLogger(__name__)
 
 
+def load_configuration():
+    # Open and load the JSON file
+    with open('config.json', 'r') as file:
+        map_var = json.load(file)
+        
+    # print(map_var)
+    return map_var
+
+CONFIGURATION = load_configuration()
+
 # browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
 # browser_title_fragment = " - Brave"
 browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
@@ -597,14 +607,6 @@ async def claimFortuneCoins():
         
     # await browser.close()
 
-def load_configuration():
-    # Open and load the JSON file
-    with open('config.json', 'r') as file:
-        map_var = json.load(file)
-        
-    # print(map_var)
-    return map_var
-
 def to_stub(s):
     s = s.lower() # make all characters lowercase
     s = re.sub(r'\W+', ' ', s) # replaces any non-alphanumeric character to a space
@@ -884,7 +886,14 @@ async def claimModo():
             name="Modo",
             base_path="imgs/modo/",
             base_url="https://modo.us/lobby?value=APPROVED"
-        )
+        )    
+
+
+#Get all of the keys from the config, which should match the enum values from CasinoEnum
+casino_list = list(CONFIGURATION.keys())
+            
+def casinoEnabled(casino):
+    return casino.value in casino_list and len(CONFIGURATION.get(casino.value).get("username")) > 0 and len(CONFIGURATION.get(casino.value).get("password")) > 0
 
 
 async def main(schedule = RunSchedule.All):
@@ -896,35 +905,33 @@ async def main(schedule = RunSchedule.All):
     try:        
         if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
 
-            #Get all of the keys from the config, which should match the enum values from CasinoEnum
-            casino_list = list(CONFIGURATION.keys())
             
             #Check if each of the Enums exist in the key list, so we know if the configuration has been filled out
-            if CasinoEnum.CHUMBA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.CHUMBA.value).get("password")) >  0:
+            if casinoEnabled(CasinoEnum.CHUMBA):
                 #Run Chumba claim
                 await claimChumba()
 
-            if CasinoEnum.LUCKYLAND.value in casino_list and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.LUCKYLAND.value).get("password")) >  0:
+            if casinoEnabled(CasinoEnum.LUCKYLAND):
                 #Run Lucky Land claim
                 await claimLuckylandslots()
 
-            if CasinoEnum.FORTUNECOINS.value in casino_list and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.FORTUNECOINS.value).get("password")) >  0:
+            if casinoEnabled(CasinoEnum.FORTUNECOINS):
                 #Run Fotune Coins claim        
                 await claimFortuneCoinsV2()     
 
-            if CasinoEnum.ZULA.value in casino_list and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.ZULA.value).get("password")) >  0:
+            if casinoEnabled(CasinoEnum.ZULA):
                 #Run Zula claim
                 await claimZula()
 
-            if CasinoEnum.PULSZ.value in casino_list and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.PULSZ.value).get("password")) >  0:
+            if casinoEnabled(CasinoEnum.PULSZ):
                 #Run Pulsz claim
                 await claimPulsz()
 
-            if CasinoEnum.HIGH5.value in casino_list and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.HIGH5.value).get("password")) >  0:
+            if casinoEnabled(CasinoEnum.HIGH5):
                 #Run High 5 claim
                 await claimHigh5()
 
-            if CasinoEnum.MODO.value in casino_list and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("username")) > 0 and len(CONFIGURATION.get(CasinoEnum.MODO.value).get("password")) >  0:
+            if casinoEnabled(CasinoEnum.MODO):
                 #Run Modo claim
                 await claimModo()
         
@@ -941,8 +948,6 @@ def startup(schedule = RunSchedule.All):
     except KeyboardInterrupt:
         pass
 
-
-CONFIGURATION = load_configuration()
 
 if __name__ ==  '__main__':
     run_schedule = RunSchedule.All
