@@ -297,18 +297,20 @@ async def navigateToChancedClaim(base_path, browser, page):
     click_location(open_claim_model)
     
     # claim_model_open.png
-    claim_model_open = wait_for_image(base_path+"claim_model_open.png")
+    claim_model_open_path="claim_model_open.png"
+    claim_model_open = wait_for_image(base_path+claim_model_open_path)
     if not claim_model_open:
-        return report_failure("Chanced Claim Navigation", f"chanced_claim_model_navigation_fail.png", f"Unable to ensure that the claim model was opened from the homepage!")
+        return report_failure("Chanced Claim Navigation", f"chanced_claim_model_navigation_fail.png", f"Unable to ensure that the claim model was opened from the homepage! - [{claim_model_open_path} was not found on the screen]")
         
     # hourly_bonus_button.png
     hourly_bonus_button = wait_for_image(base_path+"hourly_bonus_button.png")
     click_location(hourly_bonus_button)
     
     # confirm_at_claim_page.png
-    confirm_at_claim_page = wait_for_image(base_path+"confirm_at_claim_page.png")
+    confirm_at_claim_page_path="confirm_at_claim_page.png"
+    confirm_at_claim_page = wait_for_image(base_path+confirm_at_claim_page_path)
     if not confirm_at_claim_page:
-        return report_failure("Chanced Claim Navigation", f"chanced_claim_tab_navigation_fail.png", f"Unable to ensure that the claim model tab was switched correctly")
+        return report_failure("Chanced Claim Navigation", f"chanced_claim_tab_navigation_fail.png", f"Unable to ensure that the claim model tab was switched correctly - [{confirm_at_claim_page_path} was not found on the screen]")
     
     # The numbers don't update immediately for some reason??
     time.sleep(3)
@@ -660,9 +662,10 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     # Try to navigate to the webpage initially
     logging.info(f"{logging_prefix}Trying to navigate to {base_url}")
     browser, page = await start_browser(base_url)
-    webpage_loaded = wait_for_image(base_path+"webpage-loaded.png", 100)
+    webpage_loaded_path = "webpage-loaded.png"
+    webpage_loaded = wait_for_image(base_path+webpage_loaded_path, 100)
     if not webpage_loaded:
-        return report_failure(logging_prefix, f"{name_stub}_navigation_fail.png", f"Unable to load webpage of {name} for some reason!")
+        return report_failure(logging_prefix, f"{name_stub}_navigation_fail.png", f"Unable to load webpage of {name} for some reason! - [{webpage_loaded_path} was not found on the screen]")
     logging.info(f"{logging_prefix}Able to successfully navigate to {base_url}")
     
     # Are we logged in? or do we need to login now?
@@ -676,9 +679,10 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         
         logging.info(f"{logging_prefix}Attempting to login")
         
-        start_login_button = wait_for_image(base_path+"start_login.png", 20)
+        start_login_button_path="start_login.png"
+        start_login_button = wait_for_image(base_path+start_login_button_path, 20)
         if(not start_login_button):
-            return report_failure(logging_prefix, f"{name_stub}_start_login_fail.png", f"Unable to find the login button to start the login process for some reason!")
+            return report_failure(logging_prefix, f"{name_stub}_start_login_fail.png", f"Unable to find the login button to start the login process for some reason! - [{start_login_button_path} was not found on the screen]")
             
         click_location(start_login_button)
         
@@ -689,25 +693,27 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
             
             login_selection_button = wait_for_image(login_selection_image, 20)
             if(not login_selection_button):
-                return report_failure(logging_prefix, f"{name_stub}_select_login_type_fail.png", f"Unable to find the login selection button provided for some reason!")
+                return report_failure(logging_prefix, f"{name_stub}_select_login_type_fail.png", f"Unable to find the login selection button provided for some reason! - [{login_selection_image} was not found on the screen]")
                 
             click_location(login_selection_button)
         
         logging.info(f"{logging_prefix}Attempting to find login elements")
         
         logging.info(f"{logging_prefix}Attempting to fill password")
-        pass_field_location = wait_for_image(base_path+"pass_field.png", 20, 0.1, 0.99)
+        pass_field_location_path="pass_field.png"
+        pass_field_location = wait_for_image(base_path+pass_field_location_path, 20, 0.1, 0.99)
         if(not pass_field_location):
-            return report_failure(logging_prefix, f"{name_stub}_locate_password_field_fail.png", f"Unable to find the password field for some reason!")
+            return report_failure(logging_prefix, f"{name_stub}_locate_password_field_fail.png", f"Unable to find the password field for some reason! - [{pass_field_location_path} was not found on the screen]")
         time.sleep(1)
         click_location(pass_field_location)
         pyautogui.typewrite(password)
         
         
         logging.info(f"{logging_prefix}Attempting to fill username")
-        email_field_location = wait_for_image(base_path+"email_field.png", 20, 0.1, 0.99)
+        email_field_location_path="email_field.png"
+        email_field_location = wait_for_image(base_path+email_field_location_path, 20, 0.1, 0.99)
         if(not email_field_location):
-            return report_failure(logging_prefix, f"{name_stub}_locate_email_field_fail.png", f"Unable to find the email/username field for some reason!")
+            return report_failure(logging_prefix, f"{name_stub}_locate_email_field_fail.png", f"Unable to find the email/username field for some reason! - [{email_field_location_path} was not found on the screen]")
         click_location(email_field_location)
         pyautogui.typewrite(username)
         
@@ -715,20 +721,22 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         captcha_enabled = os.path.isfile(base_path+"captcha.png")
         if(captcha_enabled):
             logging.info(f"{logging_prefix}Attempting to click captcha")
-            captcha_location = wait_for_image(base_path+"captcha.png", 20, 0.1)
+            captcha_location_path="captcha.png"
+            captcha_location = wait_for_image(base_path+captcha_location_path, 20, 0.1)
             if(not captcha_location):
-                return report_failure(logging_prefix, f"{name_stub}_locate_captcha_fail.png", f"Unable to find the captcha checkbox even though a captcha image was provided!")
+                return report_failure(logging_prefix, f"{name_stub}_locate_captcha_fail.png", f"Unable to find the captcha checkbox even though a captcha image was provided! - [{captcha_location_path} was not found on the screen]")
             click_location(captcha_location)
             await asyncio.wait(5000)
         
         
         logging.info(f"{logging_prefix}Attempting to submit login information")
-        login_button_location = wait_for_image(base_path+"submit_login.png", 20, 0.1, 0.8)
+        login_button_location_path="submit_login.png"
+        login_button_location = wait_for_image(base_path+login_button_location_path, 20, 0.1, 0.8)
         if(not login_button_location):
             if(captcha_enabled):
                 return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button, captcha is probably blocking us :(!")
             else:
-                return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason!")
+                return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason! - [{login_button_location_path} was not found on the screen]")
         click_location(login_button_location)
         
         logged_in = wait_for_image(login_not_required_path, 20)
@@ -737,7 +745,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     elif (login_check_image is login_not_required_path):
         logging.info(f"{logging_prefix}Login is not required!")
     else:
-        return report_failure(logging_prefix, f"{name_stub}_login_determination_fail.png", f"Unable to determine if we need to login to {name} for some reason!")
+        return report_failure(logging_prefix, f"{name_stub}_login_determination_fail.png", f"Unable to determine if we need to login to {name} for some reason! - [{login_not_required_path} and {login_required_path} was not found on the screen]")
     
     logging.info(f"{logging_prefix}Finished ensuring that we are logged in!")
     
@@ -756,7 +764,6 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     if(claim_check_image is claim_available_path):
         logging.info(f"{logging_prefix}There is a claim available!")
         
-        
         claim_check_locationX, claim_check_locationY = location_to_point(claim_check_location)
         if claimAvailableClickOffset:
             claim_check_locationX = claim_check_locationX + claimAvailableClickOffset['x']
@@ -764,17 +771,20 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
 
         click_point(claim_check_locationX, claim_check_locationY)
         
+        # Wait for animations to end
+        time.sleep(1)
+
         claim_confirmation_path = base_path+"claim_confirmation.png"
         claim_confirmation_location = wait_for_image(claim_confirmation_path, 20)
         if(not claim_confirmation_location):
-            return report_failure(logging_prefix, f"{name_stub}_claim_confirmation_fail.png", f"Unable to find the claim confirmation for some reason!")
+            return report_failure(logging_prefix, f"{name_stub}_claim_confirmation_fail.png", f"Unable to find the claim confirmation for some reason! - [{claim_confirmation_path} was not found on the screen]")
         
         click_location(claim_confirmation_location)
         
         claim_success_path = base_path+"claim_success.png"
         claim_success_location = wait_for_image(claim_success_path, 20)
         if(not claim_success_location):
-            return report_failure(logging_prefix, f"{name_stub}_claim_success_fail.png", f"Unable to determine that the claim was finished successfully!")
+            return report_failure(logging_prefix, f"{name_stub}_claim_success_fail.png", f"Unable to determine that the claim was finished successfully! - [{claim_success_path} was not found on the screen]")
         
         if(health_check_successful_run):
             ping(health_check_successful_run)
@@ -794,7 +804,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         else:
             logging.warn(f"No health check run url defined for {name}")
     else:
-        return report_failure(logging_prefix, f"{name_stub}_claim_determination_fail.png", f"Unable to determine if there was a claim available!")
+        return report_failure(logging_prefix, f"{name_stub}_claim_determination_fail.png", f"Unable to determine if there was a claim available! - [{noclaim_available_path} and {claim_available_path} was not found on the screen]")
     
     # TODO get the current balance here    
     
@@ -823,16 +833,18 @@ async def navigateToHigh5Claim(base_path, browser, page):
     if not bonus_popup_open:
         print("It doesn't look like the bonus popup is open")
         # Open bonus_popup.png
-        bonus_popup = wait_for_image(base_path+"bonus_popup.png", 50)
+        bonus_popup_path = "bonus_popup.png"
+        bonus_popup = wait_for_image(base_path+bonus_popup_path, 50)
         if not bonus_popup:
-            return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_navigation_fail.png", f"Unable to open the bonus popup window!")
+            return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_navigation_fail.png", f"Unable to open the bonus popup window! - [{bonus_popup_path} was not found on the screen]")
             
         click_location(bonus_popup)
         
         # Is bonus_popup_open.png now?
-        bonus_popup_open_confirmation = wait_for_image(base_path+"bonus_popup_open.png", 200)
+        bonus_popup_open_confirmation_path = "bonus_popup_open.png"
+        bonus_popup_open_confirmation = wait_for_image(base_path+bonus_popup_open_confirmation_path, 200)
         if not bonus_popup_open_confirmation:    
-            return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_confirmation_fail.png", f"Unable to confirm the popup is open!")
+            return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_confirmation_fail.png", f"Unable to confirm the popup is open! - [{bonus_popup_open_confirmation_path} was not found on the screen]")
     print("Bonus popup should be open now")
     
     
@@ -854,9 +866,10 @@ async def navigateToZulaClaim(base_path, browser, page):
     click_location(coin_store)
         
     # confirm_at_claim_page.png
-    confirm_at_claim_page = wait_for_image(base_path+"confirm_at_claim_page.png", 500)
+    confirm_at_claim_page_path = "confirm_at_claim_page.png"
+    confirm_at_claim_page = wait_for_image(base_path+confirm_at_claim_page_path, 500)
     if not confirm_at_claim_page:
-        return report_failure("Zula Claim Navigation", f"zula_claim_tab_navigation_fail.png", f"Unable to ensure that we were able to open the claim model correctly")
+        return report_failure("Zula Claim Navigation", f"zula_claim_tab_navigation_fail.png", f"Unable to ensure that we were able to open the claim model correctly - [{confirm_at_claim_page_path} was not found on the screen]")
 
 async def claimZula():
     return await genericClaim(
@@ -886,7 +899,7 @@ async def claimModo():
             name="Modo",
             base_path="imgs/modo/",
             base_url="https://modo.us/lobby?value=APPROVED"
-        )    
+        )
 
 
 #Get all of the keys from the config, which should match the enum values from CasinoEnum
@@ -916,8 +929,8 @@ async def main(schedule = RunSchedule.All):
                 await claimLuckylandslots()
 
             if casinoEnabled(CasinoEnum.FORTUNECOINS):
-                #Run Fotune Coins claim        
-                await claimFortuneCoinsV2()     
+                #Run Fortune Coins claim
+                await claimFortuneCoinsV2()
 
             if casinoEnabled(CasinoEnum.ZULA):
                 #Run Zula claim

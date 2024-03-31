@@ -1,6 +1,7 @@
 # Individual app config and debug info
 config.json
 *_fail.png
+**/unused/
 
 # Python building
 __pycache__
