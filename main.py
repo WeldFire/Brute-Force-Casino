@@ -129,6 +129,7 @@ def test_for_image(img_path, max_tries=10000, delay=0.001, confidence=0.9):
     else:
         nsResult = endTime-startTime
         sResult = nsResult/1000000000
+        pyautogui.moveTo(location_to_point(location))
         print(f"Found tested image after {sResult} seconds of searching at a confidence level of {confidence}!")
         return endTime-startTime
 
@@ -634,6 +635,20 @@ def report_failure(logging_prefix, screenshot_name, message):
     logging.error(f"{logging_prefix}Saving debugging screenshot to {screenshot_name}")
     return False
     
+async def closeAnyPopupsFound(logging_prefix, base_path):
+    popup_closer_location_path="popup_close.png"
+    popup_closer_enabled = os.path.isfile(base_path+popup_closer_location_path)
+    if(popup_closer_enabled):
+        logging.info(f"{logging_prefix}Attempting to close popups")
+        while True:
+            popup_close_location = wait_for_image(base_path+popup_closer_location_path, 20, 0.1, confidence=0.9)
+            if(popup_close_location):
+                click_location(popup_close_location)
+                logging.info(f"{logging_prefix}Found a popup to close!")
+                await asyncio.sleep(2)
+            else:
+                logging.info(f"{logging_prefix}Halting search for popups as we couldn't find any close buttons")
+                break
 
 # STEPS
 # Webpage loaded
@@ -645,7 +660,7 @@ def report_failure(logging_prefix, screenshot_name, message):
 # Claim Available/Not available
 # Claim Button
 # Claim Confirmation 
-# EXPECTED FILES: (11 Required 1 Optional)
+# EXPECTED FILES: (11 Required 3 Optional)
 # - webpage-loaded.png - Determines if the initial load works (Visual Only)
 # - login_required.png - Determines if you need to login (Visual Only)
 # - login_not_required.png - Determines if you are already logged in (Visual Only)
@@ -653,7 +668,9 @@ def report_failure(logging_prefix, screenshot_name, message):
 # - login_selection.png - OPTIONAL - Starts the login process with the specified type, typically email and password (Clicked)
 # - pass_field.png - Password field (Clicked and Typed on)
 # - email_field.png - Email/Username field (Clicked and Typed on)
+# - captcha.png - OPTIONAL - If provided, tries to click on a captcha, probably won't work, but hey, it sometimes does 😅 (Clicked)
 # - submit_login.png - Button that will attempt to login with the provided credentials (Clicked)
+# - popup_close.png - OPTIONAL - If provided, tries to click on any popups found at the image location (Clicked)
 # - claim_available.png - Determines if there is a claim available (Clicked)
 # - noclaim_available.png - Determines if there is no claim currently available to claim right now (Visual Only)
 # - claim_confirmation.png - Ensures that claim confirmations are clicked (Clicked)
@@ -683,6 +700,9 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
     
     # Are we logged in? or do we need to login now?
     logging.info(f"{logging_prefix}Trying to detect if we need to login")
+    
+    #OPTIONAL - Try to close all popups
+    await closeAnyPopupsFound(logging_prefix, base_path);
     
     login_required_path = base_path+"login_required.png"
     login_not_required_path = base_path+"login_not_required.png"
@@ -739,7 +759,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
             if(not captcha_location):
                 return report_failure(logging_prefix, f"{name_stub}_locate_captcha_fail.png", f"Unable to find the captcha checkbox even though a captcha image was provided! - [{captcha_location_path} was not found on the screen]")
             click_location(captcha_location)
-            await asyncio.wait(5000)
+            await asyncio.sleep(10)
         
         
         logging.info(f"{logging_prefix}Attempting to submit login information")
@@ -751,6 +771,9 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
             else:
                 return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason! - [{login_button_location_path} was not found on the screen]")
         click_location(login_button_location)
+        
+        #OPTIONAL - Try to close all popups
+        await closeAnyPopupsFound(logging_prefix, base_path);
         
         logged_in = wait_for_image(login_not_required_path, 100)
         if(not logged_in):
@@ -927,6 +950,13 @@ async def claimRubysweeps():
             base_path="imgs/rubysweeps/",
             base_url="https://play.rubysweeps.com"
         )
+    
+async def claimDingDingDing():
+    return await genericClaim(
+            name="DingDingDing",
+            base_path="imgs/dingdingding/",
+            base_url="https://dingdingding.com/lobby/"
+        )
 
 
 #Get all of the keys from the config, which should match the enum values from CasinoEnum
@@ -944,8 +974,8 @@ async def main(schedule = RunSchedule.All):
 
     if(DEMO_MODE):
         print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
-        test_for_image("imgs/rubysweeps/login_selection.png")
-        await claimRubysweeps()
+        # test_for_image("imgs/dingdingding/test.png", confidence=0.9)
+        await claimDingDingDing()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
         exit()
     
@@ -987,6 +1017,10 @@ async def main(schedule = RunSchedule.All):
             if casinoEnabled(CasinoEnum.RUBYSWEEPS):
                 #Run Ruby Sweeps claim
                 await claimRubysweeps()
+
+            if casinoEnabled(CasinoEnum.DINGDINGDING):
+                #Run DingDingDing claim
+                await claimDingDingDing()
         
         # if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
         #     await claimChancedV2()

@@ -12,3 +12,4 @@ class CasinoEnum(Enum):
     MODO = "Modo"
     SPORTZINO = "Sportzino"
     RUBYSWEEPS = "Rubysweeps"
+    DINGDINGDING = "DingDingDing"
