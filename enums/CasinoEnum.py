@@ -11,3 +11,4 @@ class CasinoEnum(Enum):
     HIGH5 = "High 5"
     MODO = "Modo"
     SPORTZINO = "Sportzino"
+    RUBYSWEEPS = "Rubysweeps"

@@ -119,6 +119,19 @@ def wait_for_image(img_path, max_tries=-1, delay=0.1, confidence=0.9):
 
     return found_location
 
+def test_for_image(img_path, max_tries=10000, delay=0.001, confidence=0.9):
+    startTime=time.process_time_ns()
+    location = wait_for_image(img_path, max_tries, delay, confidence)
+    endTime = time.process_time_ns()
+    if(not location):
+        print("Unable to find tested image after waiting over 10 seconds!")
+        return -1
+    else:
+        nsResult = endTime-startTime
+        sResult = nsResult/1000000000
+        print(f"Found tested image after {sResult} seconds of searching at a confidence level of {confidence}!")
+        return endTime-startTime
+
 def click_location(location):
     x, y = location_to_point(location)
     click_point(x, y)
@@ -907,6 +920,13 @@ async def claimSportzino():
             base_path="imgs/sportzino/",
             base_url="https://sportzino.com/lobby"
         )
+    
+async def claimRubysweeps():
+    return await genericClaim(
+            name="Rubysweeps",
+            base_path="imgs/rubysweeps/",
+            base_url="https://play.rubysweeps.com"
+        )
 
 
 #Get all of the keys from the config, which should match the enum values from CasinoEnum
@@ -924,9 +944,10 @@ async def main(schedule = RunSchedule.All):
 
     if(DEMO_MODE):
         print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
-        await claimSportzino()
+        test_for_image("imgs/rubysweeps/login_selection.png")
+        await claimRubysweeps()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
-        exit();
+        exit()
     
     try:        
         if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
@@ -962,6 +983,10 @@ async def main(schedule = RunSchedule.All):
             if casinoEnabled(CasinoEnum.SPORTZINO):
                 #Run Sportzino claim
                 await claimSportzino()
+
+            if casinoEnabled(CasinoEnum.RUBYSWEEPS):
+                #Run Ruby Sweeps claim
+                await claimRubysweeps()
         
         # if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
         #     await claimChancedV2()
