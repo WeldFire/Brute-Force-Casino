@@ -10,3 +10,4 @@ class CasinoEnum(Enum):
     PULSZ = "Pulsz"
     HIGH5 = "High 5"
     MODO = "Modo"
+    SPORTZINO = "Sportzino"

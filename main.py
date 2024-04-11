@@ -632,7 +632,7 @@ def report_failure(logging_prefix, screenshot_name, message):
 # Claim Available/Not available
 # Claim Button
 # Claim Confirmation 
-# EXPECTED FILES:
+# EXPECTED FILES: (11 Required 1 Optional)
 # - webpage-loaded.png - Determines if the initial load works (Visual Only)
 # - login_required.png - Determines if you need to login (Visual Only)
 # - login_not_required.png - Determines if you are already logged in (Visual Only)
@@ -648,8 +648,8 @@ def report_failure(logging_prefix, screenshot_name, message):
 # EXPECTED CONFIGURATION:
 # - username - The username or email field to be used to login
 # - password - The password used to login
-# - health_check_successful_run - OPTIONAL The health check endpoint 
-# - health_check_successful_claim
+# - health_check_successful_run - OPTIONAL The health check endpoint called on run
+# - health_check_successful_claim - OPTIONAL The health check endpoint called on claim
 async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, claimAvailableClickOffset=None):
     username = CONFIGURATION[name][CONFIG_USERNAME]
     password = CONFIGURATION[name][CONFIG_PASSWORD]
@@ -739,7 +739,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
                 return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason! - [{login_button_location_path} was not found on the screen]")
         click_location(login_button_location)
         
-        logged_in = wait_for_image(login_not_required_path, 20)
+        logged_in = wait_for_image(login_not_required_path, 100)
         if(not logged_in):
             return report_failure(logging_prefix, f"{name_stub}_login_fail.png", f"Unable to login!")
     elif (login_check_image is login_not_required_path):
@@ -900,6 +900,13 @@ async def claimModo():
             base_path="imgs/modo/",
             base_url="https://modo.us/lobby?value=APPROVED"
         )
+    
+async def claimSportzino():
+    return await genericClaim(
+            name="Sportzino",
+            base_path="imgs/sportzino/",
+            base_url="https://sportzino.com/lobby"
+        )
 
 
 #Get all of the keys from the config, which should match the enum values from CasinoEnum
@@ -908,17 +915,21 @@ casino_list = list(CONFIGURATION.keys())
 def casinoEnabled(casino):
     return casino.value in casino_list and len(CONFIGURATION.get(casino.value).get("username")) > 0 and len(CONFIGURATION.get(casino.value).get("password")) > 0
 
-
+DEMO_MODE = False
 async def main(schedule = RunSchedule.All):
     if (CONFIG_BASE in CONFIGURATION and CONFIG_HEALTH_CHECK_TOOL_RUNNING in CONFIGURATION[CONFIG_BASE]):
         ping(CONFIGURATION[CONFIG_BASE][CONFIG_HEALTH_CHECK_TOOL_RUNNING])
     else:
         logging.warn("Base configuration health check url wasn't defined so its ping will be skipped")
+
+    if(DEMO_MODE):
+        print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
+        await claimSportzino()
+        print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
+        exit();
     
     try:        
         if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
-
-            
             #Check if each of the Enums exist in the key list, so we know if the configuration has been filled out
             if casinoEnabled(CasinoEnum.CHUMBA):
                 #Run Chumba claim
@@ -947,6 +958,10 @@ async def main(schedule = RunSchedule.All):
             if casinoEnabled(CasinoEnum.MODO):
                 #Run Modo claim
                 await claimModo()
+
+            if casinoEnabled(CasinoEnum.SPORTZINO):
+                #Run Sportzino claim
+                await claimSportzino()
         
         # if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
         #     await claimChancedV2()
