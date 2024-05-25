@@ -955,7 +955,7 @@ async def claimDingDingDing():
     return await genericClaim(
             name="DingDingDing",
             base_path="imgs/dingdingding/",
-            base_url="https://dingdingding.com/lobby/"
+            base_url="https://dingdingding.com/login/"
         )
 
 
@@ -974,8 +974,9 @@ async def main(schedule = RunSchedule.All):
 
     if(DEMO_MODE):
         print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
+        logging.basicConfig(level=logging.DEBUG)
         # test_for_image("imgs/dingdingding/test.png", confidence=0.9)
-        await claimDingDingDing()
+        await claimSportzino()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
         exit()
     
