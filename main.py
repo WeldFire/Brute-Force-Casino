@@ -38,7 +38,7 @@ CONFIG_HEALTH_CLAIM="health_check_successful_claim"
 CONFIG_HEALTH_CHECK_TOOL_RUNNING = "health_check_tool_running"
 
 # logging.basicConfig(level=logging.DEBUG)
-logging = logging.getLogger(__name__)
+# logging = logging.getLogger(__name__)
 
 
 def load_configuration():
@@ -176,65 +176,26 @@ def ping(url):
         # Log ping failure here...
         print("Ping failed: %s" % e)
 
-async def getChumbaSCBalance(page):
-    print("TODO getChumbaSCBalance SEEMS BROKEN!")
-    return -1
-    # return await page.evaluate('document.querySelector("div.counter.counter--SC").innerText')
+async def navigateToChumbaClaim(base_path, browser, page):
+    # click on get_coins.png
+    get_coins = wait_for_image(base_path+"get_coins.png")
+    click_location(get_coins)
+
+    # click on daily_bonus_tab.png
+    daily_bonus_tab_path="daily_bonus_tab.png"
+    daily_bonus_tab = wait_for_image(base_path+daily_bonus_tab_path)
+    if not daily_bonus_tab:
+        return report_failure("Chumba Claim Navigation", f"chumba_daily_bonus_tab_navigation_fail.png", f"Unable to ensure that we could navigate to the daily bonus tab from the get coins page! - [{daily_bonus_tab_path} was not found on the screen]")
+    else:
+        click_location(daily_bonus_tab)
 
 async def claimChumba():
-    name = "Chumba"
-    base_path = "imgs/chumba/"
-    # Use the functions
-    browser, page = await start_browser("https://login.chumbacasino.com/")
-    location = wait_for_image(base_path+"login.png", 50)
-    email_location = find_image(base_path+"email.png")
-    pass_location = find_image(base_path+"pass.png")
-    if location:
-        click_location(pass_location)
-        pyautogui.typewrite(CONFIGURATION[name][CONFIG_PASSWORD])
-        click_location(email_location)
-        pyautogui.typewrite(CONFIGURATION[name][CONFIG_USERNAME])
-        click_location(location)
-        
-        claim_img_path = base_path+"claim.png"
-        noclaim_img_path = base_path+"noclaim.png"
-        loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 50)
-        
-        
-        if(loaded_image is claim_img_path):
-            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
-                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
-            else:
-                logging.warn(f"No health check run url defined for {name}")
-            #Adjust for looking at the close button
-            click_point(loaded_location.left+(loaded_location.width/2), loaded_location.top-45+(loaded_location.height/2))
-            if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
-                ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
-            else:
-                logging.warn(f"No health check claim url defined for {name}")
-            balance = await getChumbaSCBalance(page)
-            print(f"Current Chumba Balance is {balance}")
-        elif(loaded_image is noclaim_img_path):
-            print(f"No claim available right now!")
-            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
-                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
-            else:
-                logging.warn(f"No health check run url defined for {name}")
-            balance = await getChumbaSCBalance(page)
-            print(f"Current Chumba Balance is {balance}")
-        else:
-            # take a screenshot of the entire screen
-            screenshot_name = "chumba_login_fail.png"
-            pyautogui.screenshot(screenshot_name)
-            print(f"Unable to login!! Screen saved to {screenshot_name}")
-        
-        # document.querySelector("").value = '';
-        # document.querySelector("button[id='login_submit-button']").click(); //Error???
-    else:
-        print("ERROR Wasn't able to start up!! (Browser not on the main window?)")
-        
-    # await browser.close()
-
+    return await genericClaim(
+            name="Chumba",
+            base_path="imgs/chumba/",
+            base_url="https://login.chumbacasino.com/",
+            customNavigateToClaim=navigateToChumbaClaim
+        )
 
 async def getPulszSCBalance(page):
     print("TODO getPulszSCBalance SEEMS BROKEN!")
@@ -650,6 +611,23 @@ async def closeAnyPopupsFound(logging_prefix, base_path):
                 logging.info(f"{logging_prefix}Halting search for popups as we couldn't find any close buttons")
                 break
 
+def reportBadConfiguration(message):
+    CONFIGURATION_ERROR_MESSAGE = "~~~~~~~~~~Configuration Error Found!~~~~~~~~~~"
+    print(CONFIGURATION_ERROR_MESSAGE)
+    print(message)
+    print(CONFIGURATION_ERROR_MESSAGE)
+    exit()
+
+def assertValidConfiguration(name):
+    if name not in CONFIGURATION:
+        reportBadConfiguration(f"'{name}' was not found to be defined as a casino in your `config.json` file")
+
+    if CONFIG_USERNAME not in CONFIGURATION[name]:
+        reportBadConfiguration(f"The '{CONFIG_USERNAME}' key was not found to be defined in your '{name}' casino configuration in your `config.json` file")
+
+    if CONFIG_PASSWORD not in CONFIGURATION[name]:
+        reportBadConfiguration(f"The '{CONFIG_PASSWORD}' key was not found to be defined in your '{name}' casino configuration in your `config.json` file")
+
 # STEPS
 # Webpage loaded
 # Need to login/Logged in confirmation
@@ -657,6 +635,7 @@ async def closeAnyPopupsFound(logging_prefix, base_path):
 # Password
 # Login Button
 # Logged in confirmation
+# OPTIONAL - Custom navigation to claim page 
 # Claim Available/Not available
 # Claim Button
 # Claim Confirmation 
@@ -673,7 +652,7 @@ async def closeAnyPopupsFound(logging_prefix, base_path):
 # - popup_close.png - OPTIONAL - If provided, tries to click on any popups found at the image location (Clicked)
 # - claim_available.png - Determines if there is a claim available (Clicked)
 # - noclaim_available.png - Determines if there is no claim currently available to claim right now (Visual Only)
-# - claim_confirmation.png - Ensures that claim confirmations are clicked (Clicked)
+# - claim_confirmation.png - OPTIONAL - Ensures that claim confirmations are clicked (Clicked)
 # - claim_success.png - Indicator that the claim was successful (Visual Only)
 # EXPECTED CONFIGURATION:
 # - username - The username or email field to be used to login
@@ -681,10 +660,11 @@ async def closeAnyPopupsFound(logging_prefix, base_path):
 # - health_check_successful_run - OPTIONAL The health check endpoint called on run
 # - health_check_successful_claim - OPTIONAL The health check endpoint called on claim
 async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, claimAvailableClickOffset=None):
+    assertValidConfiguration(name)
     username = CONFIGURATION[name][CONFIG_USERNAME]
     password = CONFIGURATION[name][CONFIG_PASSWORD]
-    health_check_successful_run = CONFIGURATION[name][CONFIG_HEALTH_RUN]
-    health_check_successful_claim = CONFIGURATION[name][CONFIG_HEALTH_CLAIM]
+    health_check_successful_run = CONFIGURATION[name][CONFIG_HEALTH_RUN] if CONFIG_HEALTH_RUN in CONFIGURATION[name] else None
+    health_check_successful_claim = CONFIGURATION[name][CONFIG_HEALTH_CLAIM] if CONFIG_HEALTH_CLAIM in CONFIGURATION[name] else None
     
     name_stub = to_stub(name)
     logging_prefix = f"GenericClaim - {name} - "
@@ -811,9 +791,11 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         time.sleep(1)
 
         claim_confirmation_path = base_path+"claim_confirmation.png"
-        claim_confirmation_location = wait_for_image(claim_confirmation_path, 20)
-        if(not claim_confirmation_location):
-            return report_failure(logging_prefix, f"{name_stub}_claim_confirmation_fail.png", f"Unable to find the claim confirmation for some reason! - [{claim_confirmation_path} was not found on the screen]")
+        claim_confirmation_enabled = os.path.isfile(claim_confirmation_path)
+        if claim_confirmation_enabled:
+            claim_confirmation_location = wait_for_image(claim_confirmation_path, 20)
+            if(not claim_confirmation_location):
+                return report_failure(logging_prefix, f"{name_stub}_claim_confirmation_fail.png", f"Unable to find the claim confirmation for some reason! - [{claim_confirmation_path} was not found on the screen]")
         
         click_location(claim_confirmation_location)
         
@@ -975,8 +957,8 @@ async def main(schedule = RunSchedule.All):
     if(DEMO_MODE):
         print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
         logging.basicConfig(level=logging.DEBUG)
-        # test_for_image("imgs/dingdingding/test.png", confidence=0.9)
-        await claimSportzino()
+        # test_for_image("imgs/chumba/daily_bonus_tab.png", confidence=0.9)
+        await claimChumba()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
         exit()
     
