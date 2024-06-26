@@ -635,7 +635,7 @@ def assertValidConfiguration(name):
 # Password
 # Login Button
 # Logged in confirmation
-# OPTIONAL - Custom navigation to claim page 
+# OPTIONAL - Custom navigation to claim page
 # Claim Available/Not available
 # Claim Button
 # Claim Confirmation 
@@ -757,7 +757,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         
         logged_in = wait_for_image(login_not_required_path, 100)
         if(not logged_in):
-            return report_failure(logging_prefix, f"{name_stub}_login_fail.png", f"Unable to login!")
+            return report_failure(logging_prefix, f"{name_stub}_login_fail.png", f"Unable to login! - [{login_not_required_path} was not found on the screen]")
     elif (login_check_image is login_not_required_path):
         logging.info(f"{logging_prefix}Login is not required!")
     else:
@@ -870,22 +870,22 @@ async def navigateToHigh5Claim(base_path, browser, page):
 
 async def navigateToZulaClaim(base_path, browser, page):
     # close_modal.png
-    close_modal = wait_for_image(base_path+"close_modal.png", 500)
+    close_modal = wait_for_image(base_path+"close_modal.png", 100)
     if close_modal:
         click_location(close_modal)
 
-    # close second modal if it exists
-    close_modal = wait_for_image(base_path+"close_modal.png", 500)
-    if close_modal:
-        click_location(close_modal)
+        # close second modal if it exists
+        close_modal = wait_for_image(base_path+"close_modal.png", 100)
+        if close_modal:
+            click_location(close_modal)
     
     # coin_store.png
-    coin_store = wait_for_image(base_path+"coin_store.png", 500)
+    coin_store = wait_for_image(base_path+"coin_store.png", 300)
     click_location(coin_store)
         
     # confirm_at_claim_page.png
     confirm_at_claim_page_path = "confirm_at_claim_page.png"
-    confirm_at_claim_page = wait_for_image(base_path+confirm_at_claim_page_path, 500)
+    confirm_at_claim_page = wait_for_image(base_path+confirm_at_claim_page_path, 300)
     if not confirm_at_claim_page:
         return report_failure("Zula Claim Navigation", f"zula_claim_tab_navigation_fail.png", f"Unable to ensure that we were able to open the claim model correctly - [{confirm_at_claim_page_path} was not found on the screen]")
 
@@ -958,7 +958,7 @@ async def main(schedule = RunSchedule.All):
         print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
         logging.basicConfig(level=logging.DEBUG)
         # test_for_image("imgs/chumba/daily_bonus_tab.png", confidence=0.9)
-        await claimChumba()
+        await claimZula()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
         exit()
     
