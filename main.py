@@ -203,63 +203,66 @@ async def getPulszSCBalance(page):
     # return await page.evaluate('document.querySelector("[data-test=\"header-sweepstakes-value\"]").innerText')
 
 async def claimPulsz():
-    name = "Pulsz"
-    base_path = "imgs/pulsz/"
-    # Use the functions
-    browser, page = await start_browser("https://www.pulsz.com/login")
-    time.sleep(3) # Login screen appears then goes away, need to convert this to the new method....
-    location = wait_for_image(base_path+"login.png", 20)
-    email_location = find_image(base_path+"email.png")
-    pass_location = find_image(base_path+"pass.png")
-    if location:
-        click_location(pass_location)
-        pyautogui.typewrite(CONFIGURATION[name][CONFIG_PASSWORD])
-        click_location(email_location)
-        pyautogui.typewrite(CONFIGURATION[name][CONFIG_USERNAME])
-        click_location(location)
+    try:
+        name = "Pulsz"
+        base_path = "imgs/pulsz/"
+        # Use the functions
+        browser, page = await start_browser("https://www.pulsz.com/login")
+        time.sleep(3) # Login screen appears then goes away, need to convert this to the new method....
+        location = wait_for_image(base_path+"login.png", 20)
+        email_location = find_image(base_path+"email.png")
+        pass_location = find_image(base_path+"pass.png")
+        if location:
+            click_location(pass_location)
+            pyautogui.typewrite(CONFIGURATION[name][CONFIG_PASSWORD])
+            click_location(email_location)
+            pyautogui.typewrite(CONFIGURATION[name][CONFIG_USERNAME])
+            click_location(location)
+            
+            # document.querySelector("").value = '';
+            # document.querySelector("button[id='login_submit-button']").click(); //Error???
+        else:
+            print("Doesn't look like we needed to log in")
         
-        # document.querySelector("").value = '';
-        # document.querySelector("button[id='login_submit-button']").click(); //Error???
-    else:
-        print("Doesn't look like we needed to log in")
-    
-    time.sleep(1)
-    
-    claim_img_path = base_path+"claim.png"
-    noclaim_img_path = base_path+"noclaim.png"
-    loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 50)
-    
-    if(loaded_image is claim_img_path):
-        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
-            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
-        else:
-            logging.warn(f"No health check run url defined for {name}")
-
-        click_location(loaded_location)
-
-        if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
-            ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
-        else:
-            logging.warn(f"No health check claim url defined for {name}")
-        balance = await getPulszSCBalance(page)
-        print(f"Current Pulsz Balance is {balance}")
-    elif(loaded_image is noclaim_img_path):
-        print(f"No claim available right now!")
-
-        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
-            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
-        else:
-            logging.warn(f"No health check run url defined for {name}")
-
-        balance = await getPulszSCBalance(page)
-        print(f"Current Pulsz Balance is {balance}")
-    else:
-        # take a screenshot of the entire screen
-        screenshot_name = "pulsz_login_fail.png"
-        pyautogui.screenshot(screenshot_name)
-        print(f"Unable to login!! Screen saved to {screenshot_name}")
+        time.sleep(1)
         
-    # await browser.close()
+        claim_img_path = base_path+"claim.png"
+        noclaim_img_path = base_path+"noclaim.png"
+        loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 50)
+        
+        if(loaded_image is claim_img_path):
+            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+            else:
+                logging.warn(f"No health check run url defined for {name}")
+
+            click_location(loaded_location)
+
+            if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+            else:
+                logging.warn(f"No health check claim url defined for {name}")
+            balance = await getPulszSCBalance(page)
+            print(f"Current Pulsz Balance is {balance}")
+        elif(loaded_image is noclaim_img_path):
+            print(f"No claim available right now!")
+
+            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+            else:
+                logging.warn(f"No health check run url defined for {name}")
+
+            balance = await getPulszSCBalance(page)
+            print(f"Current Pulsz Balance is {balance}")
+        else:
+            # take a screenshot of the entire screen
+            screenshot_name = "pulsz_login_fail.png"
+            pyautogui.screenshot(screenshot_name)
+            print(f"Unable to login!! Screen saved to {screenshot_name}")
+            
+        # await browser.close()
+    except Exception as ex:
+        return report_failure("PulszManualClaimer", f"pulsz_unexpected_error_fail.png", f"An unexpected error occurred that couldn't be handled while processing {name}! - [{repr(ex)}]")
 
 async def getChancedSCBalance(page):
     print("TODO getChancedSCBalance SEEMS BROKEN!")
@@ -397,95 +400,98 @@ async def getLuckylandSCBalance(page):
     # return await page.evaluate('document.querySelector("#headlessui-menu-button-1").innerText.split("\n")[0]')
 
 async def claimLuckylandslots():
-    name = "Lucky Land"
-    base_path = "imgs/luckyland/"
-    # Use the functions
-    browser, page = await start_browser("https://luckylandslots.com/loader")
-    start_login_location = wait_for_image(base_path+"start-login.png", 50)
-    
-    if start_login_location:
-        print("Looks like we need to login to lucky land!")
-        click_location(start_login_location)
-        login_button_location = wait_for_image(base_path+"login.png", 20, 0.1, 0.8)
-        email_location = wait_for_image(base_path+"email.png", 20, 0.1, 0.8)
-        pass_location = wait_for_image(base_path+"pass.png", 20, 0.1, 0.8)
-        if login_button_location:
-            click_location(pass_location)
-            pyautogui.typewrite(CONFIGURATION[name][CONFIG_PASSWORD])
-            click_location(email_location)
-            pyautogui.typewrite(CONFIGURATION[name][CONFIG_USERNAME])
-            location = wait_for_image(base_path+"login.png", 20, 0.1, 0.8)
-            click_location(location)
-            # document.querySelector("").value = '';
-            # document.querySelector("button[id='login_submit-button']").click(); //Error???
-        else:
-            print("We can't login to lucky land for some reason :(")
-            screenshot_name = "luckyland_login_fail.png"
-            pyautogui.screenshot(screenshot_name)
-            print(f"Unable to login!! Screen saved to {screenshot_name}")
-            return
-    else:
-        print("Looks like we are already logged in to lucky land!")
-
-    time.sleep(3) # Zzz don't like waiting this way, need to convert to other method
-    
-    claim_img_path = base_path+"claim.png"
-    noclaim_img_path = base_path+"noclaim.png"
-    loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 100)
-
-    # Get the latest page object
-    # page = (await browser.pages())[-1]
-
-    if(loaded_image is claim_img_path):
-        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
-            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
-        else:
-            logging.warn(f"No health check run url defined for {name}")
-
-        #Adjust for looking at the close button
-        # click_point(loaded_location.left+(loaded_location.width/2), loaded_location.top-45+(loaded_location.height/2))
-        click_location(loaded_location)
-        # confirm = wait_for_image(base_path+"confirm-claim.png", 20)
-        # if(confirm):
-        #     click_location(confirm)    
-            
-        #     claimed = wait_for_image(base_path+"claimed.png", 20)
-        #     if(claimed):
-
-        if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
-            ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
-        else:
-            logging.warn(f"No health check claim url defined for {name}")
-
-        balance = await getLuckylandSCBalance(page)
-        print(f"Current lucky land Balance is {balance}")
-        #     else:
-        #         screenshot_name = "luckyland_second_confirm_claim_fail.png"
-        #         pyautogui.screenshot(screenshot_name)
-        #         print(f"Unable to confirm claim!! Screen saved to {screenshot_name}")
-        # else:
-        #     screenshot_name = "luckyland_confirm_claim_fail.png"
-        #     pyautogui.screenshot(screenshot_name)
-        #     print(f"Unable to confirm claim!! Screen saved to {screenshot_name}")
-            
-    elif(loaded_image is noclaim_img_path):
-        print(f"No claim available right now!")
-
-        if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
-            ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
-        else:
-            logging.warn(f"No health check run url defined for {name}")
-
-        balance = await getLuckylandSCBalance(page)
-        print(f"Current luckyland Balance is {balance}")
-    else:
-        # take a screenshot of the entire screen
-        screenshot_name = "luckyland_claim_fail.png"
-        pyautogui.screenshot(screenshot_name)
-        print(f"Unable to claim!! Screen saved to {screenshot_name}")
-    
+    try:
+        name = "Lucky Land"
+        base_path = "imgs/luckyland/"
+        # Use the functions
+        browser, page = await start_browser("https://luckylandslots.com/loader")
+        start_login_location = wait_for_image(base_path+"start-login.png", 50)
         
-    # await browser.close()
+        if start_login_location:
+            print("Looks like we need to login to lucky land!")
+            click_location(start_login_location)
+            login_button_location = wait_for_image(base_path+"login.png", 20, 0.1, 0.8)
+            email_location = wait_for_image(base_path+"email.png", 20, 0.1, 0.8)
+            pass_location = wait_for_image(base_path+"pass.png", 20, 0.1, 0.8)
+            if login_button_location:
+                click_location(pass_location)
+                pyautogui.typewrite(CONFIGURATION[name][CONFIG_PASSWORD])
+                click_location(email_location)
+                pyautogui.typewrite(CONFIGURATION[name][CONFIG_USERNAME])
+                location = wait_for_image(base_path+"login.png", 20, 0.1, 0.8)
+                click_location(location)
+                # document.querySelector("").value = '';
+                # document.querySelector("button[id='login_submit-button']").click(); //Error???
+            else:
+                print("We can't login to lucky land for some reason :(")
+                screenshot_name = "luckyland_login_fail.png"
+                pyautogui.screenshot(screenshot_name)
+                print(f"Unable to login!! Screen saved to {screenshot_name}")
+                return
+        else:
+            print("Looks like we are already logged in to lucky land!")
+
+        time.sleep(3) # Zzz don't like waiting this way, need to convert to other method
+        
+        claim_img_path = base_path+"claim.png"
+        noclaim_img_path = base_path+"noclaim.png"
+        loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 100)
+
+        # Get the latest page object
+        # page = (await browser.pages())[-1]
+
+        if(loaded_image is claim_img_path):
+            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+            else:
+                logging.warn(f"No health check run url defined for {name}")
+
+            #Adjust for looking at the close button
+            # click_point(loaded_location.left+(loaded_location.width/2), loaded_location.top-45+(loaded_location.height/2))
+            click_location(loaded_location)
+            # confirm = wait_for_image(base_path+"confirm-claim.png", 20)
+            # if(confirm):
+            #     click_location(confirm)    
+                
+            #     claimed = wait_for_image(base_path+"claimed.png", 20)
+            #     if(claimed):
+
+            if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+            else:
+                logging.warn(f"No health check claim url defined for {name}")
+
+            balance = await getLuckylandSCBalance(page)
+            print(f"Current lucky land Balance is {balance}")
+            #     else:
+            #         screenshot_name = "luckyland_second_confirm_claim_fail.png"
+            #         pyautogui.screenshot(screenshot_name)
+            #         print(f"Unable to confirm claim!! Screen saved to {screenshot_name}")
+            # else:
+            #     screenshot_name = "luckyland_confirm_claim_fail.png"
+            #     pyautogui.screenshot(screenshot_name)
+            #     print(f"Unable to confirm claim!! Screen saved to {screenshot_name}")
+                
+        elif(loaded_image is noclaim_img_path):
+            print(f"No claim available right now!")
+
+            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+            else:
+                logging.warn(f"No health check run url defined for {name}")
+
+            balance = await getLuckylandSCBalance(page)
+            print(f"Current luckyland Balance is {balance}")
+        else:
+            # take a screenshot of the entire screen
+            screenshot_name = "luckyland_claim_fail.png"
+            pyautogui.screenshot(screenshot_name)
+            print(f"Unable to claim!! Screen saved to {screenshot_name}")
+        
+            
+        # await browser.close()
+    except Exception as ex:
+        return report_failure("LuckyLandCustomClaimer", f"luckyland_unexpected_error_fail.png", f"An unexpected error occurred that couldn't be handled while processing {name}! - [{repr(ex)}]")
 
 
 async def getFortuneCoinsSCBalance(page):
@@ -660,177 +666,180 @@ def assertValidConfiguration(name):
 # - health_check_successful_run - OPTIONAL The health check endpoint called on run
 # - health_check_successful_claim - OPTIONAL The health check endpoint called on claim
 async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, claimAvailableClickOffset=None):
-    assertValidConfiguration(name)
-    username = CONFIGURATION[name][CONFIG_USERNAME]
-    password = CONFIGURATION[name][CONFIG_PASSWORD]
-    health_check_successful_run = CONFIGURATION[name][CONFIG_HEALTH_RUN] if CONFIG_HEALTH_RUN in CONFIGURATION[name] else None
-    health_check_successful_claim = CONFIGURATION[name][CONFIG_HEALTH_CLAIM] if CONFIG_HEALTH_CLAIM in CONFIGURATION[name] else None
-    
-    name_stub = to_stub(name)
-    logging_prefix = f"GenericClaim - {name} - "
-    
-    # Try to navigate to the webpage initially
-    logging.info(f"{logging_prefix}Trying to navigate to {base_url}")
-    browser, page = await start_browser(base_url)
-    webpage_loaded_path = "webpage-loaded.png"
-    webpage_loaded = wait_for_image(base_path+webpage_loaded_path, 100)
-    if not webpage_loaded:
-        return report_failure(logging_prefix, f"{name_stub}_navigation_fail.png", f"Unable to load webpage of {name} for some reason! - [{webpage_loaded_path} was not found on the screen]")
-    logging.info(f"{logging_prefix}Able to successfully navigate to {base_url}")
-    
-    # Are we logged in? or do we need to login now?
-    logging.info(f"{logging_prefix}Trying to detect if we need to login")
-    
-    #OPTIONAL - Try to close all popups
-    await closeAnyPopupsFound(logging_prefix, base_path);
-    
-    login_required_path = base_path+"login_required.png"
-    login_not_required_path = base_path+"login_not_required.png"
-    _, login_check_image = wait_for_any_image_to_exist([login_required_path, login_not_required_path], 50)
-    if (login_check_image is login_required_path):
-        logging.info(f"{logging_prefix}Login is required")
+    try:
+        assertValidConfiguration(name)
+        username = CONFIGURATION[name][CONFIG_USERNAME]
+        password = CONFIGURATION[name][CONFIG_PASSWORD]
+        health_check_successful_run = CONFIGURATION[name][CONFIG_HEALTH_RUN] if CONFIG_HEALTH_RUN in CONFIGURATION[name] else None
+        health_check_successful_claim = CONFIGURATION[name][CONFIG_HEALTH_CLAIM] if CONFIG_HEALTH_CLAIM in CONFIGURATION[name] else None
         
-        logging.info(f"{logging_prefix}Attempting to login")
+        name_stub = to_stub(name)
+        logging_prefix = f"GenericClaim - {name} - "
         
-        start_login_button_path="start_login.png"
-        start_login_button = wait_for_image(base_path+start_login_button_path, 20)
-        if(not start_login_button):
-            return report_failure(logging_prefix, f"{name_stub}_start_login_fail.png", f"Unable to find the login button to start the login process for some reason! - [{start_login_button_path} was not found on the screen]")
-            
-        click_location(start_login_button)
+        # Try to navigate to the webpage initially
+        logging.info(f"{logging_prefix}Trying to navigate to {base_url}")
+        browser, page = await start_browser(base_url)
+        webpage_loaded_path = "webpage-loaded.png"
+        webpage_loaded = wait_for_image(base_path+webpage_loaded_path, 100)
+        if not webpage_loaded:
+            return report_failure(logging_prefix, f"{name_stub}_navigation_fail.png", f"Unable to load webpage of {name} for some reason! - [{webpage_loaded_path} was not found on the screen]")
+        logging.info(f"{logging_prefix}Able to successfully navigate to {base_url}")
         
-        # OPTIONAL - Try to find login selector if it was defined
-        login_selection_image = base_path+"login_selection.png"
-        if os.path.isfile(login_selection_image):
-            logging.info(f"{logging_prefix}Attempting to find login selection element")
-            
-            login_selection_button = wait_for_image(login_selection_image, 20)
-            if(not login_selection_button):
-                return report_failure(logging_prefix, f"{name_stub}_select_login_type_fail.png", f"Unable to find the login selection button provided for some reason! - [{login_selection_image} was not found on the screen]")
-                
-            click_location(login_selection_button)
-        
-        logging.info(f"{logging_prefix}Attempting to find login elements")
-        
-        logging.info(f"{logging_prefix}Attempting to fill password")
-        pass_field_location_path="pass_field.png"
-        pass_field_location = wait_for_image(base_path+pass_field_location_path, 20, 0.1, 0.99)
-        if(not pass_field_location):
-            return report_failure(logging_prefix, f"{name_stub}_locate_password_field_fail.png", f"Unable to find the password field for some reason! - [{pass_field_location_path} was not found on the screen]")
-        time.sleep(1)
-        click_location(pass_field_location)
-        pyautogui.typewrite(password)
-        
-        
-        logging.info(f"{logging_prefix}Attempting to fill username")
-        email_field_location_path="email_field.png"
-        email_field_location = wait_for_image(base_path+email_field_location_path, 20, 0.1, 0.99)
-        if(not email_field_location):
-            return report_failure(logging_prefix, f"{name_stub}_locate_email_field_fail.png", f"Unable to find the email/username field for some reason! - [{email_field_location_path} was not found on the screen]")
-        click_location(email_field_location)
-        pyautogui.typewrite(username)
-        
-        #OPTIONAL - Try to click captcha        
-        captcha_enabled = os.path.isfile(base_path+"captcha.png")
-        if(captcha_enabled):
-            logging.info(f"{logging_prefix}Attempting to click captcha")
-            captcha_location_path="captcha.png"
-            captcha_location = wait_for_image(base_path+captcha_location_path, 20, 0.1)
-            if(not captcha_location):
-                return report_failure(logging_prefix, f"{name_stub}_locate_captcha_fail.png", f"Unable to find the captcha checkbox even though a captcha image was provided! - [{captcha_location_path} was not found on the screen]")
-            click_location(captcha_location)
-            await asyncio.sleep(10)
-        
-        
-        logging.info(f"{logging_prefix}Attempting to submit login information")
-        login_button_location_path="submit_login.png"
-        login_button_location = wait_for_image(base_path+login_button_location_path, 20, 0.1, 0.8)
-        if(not login_button_location):
-            if(captcha_enabled):
-                return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button, captcha is probably blocking us :(!")
-            else:
-                return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason! - [{login_button_location_path} was not found on the screen]")
-        click_location(login_button_location)
+        # Are we logged in? or do we need to login now?
+        logging.info(f"{logging_prefix}Trying to detect if we need to login")
         
         #OPTIONAL - Try to close all popups
         await closeAnyPopupsFound(logging_prefix, base_path);
         
-        logged_in = wait_for_image(login_not_required_path, 100)
-        if(not logged_in):
-            return report_failure(logging_prefix, f"{name_stub}_login_fail.png", f"Unable to login! - [{login_not_required_path} was not found on the screen]")
-    elif (login_check_image is login_not_required_path):
-        logging.info(f"{logging_prefix}Login is not required!")
-    else:
-        return report_failure(logging_prefix, f"{name_stub}_login_determination_fail.png", f"Unable to determine if we need to login to {name} for some reason! - [{login_not_required_path} and {login_required_path} was not found on the screen]")
-    
-    logging.info(f"{logging_prefix}Finished ensuring that we are logged in!")
-    
-    if(customNavigateToClaim is not None):
-        logging.info(f"{logging_prefix}A custom claim navigation was provided, so we will call it now")
-        await customNavigateToClaim(base_path, browser, page)
-        logging.info(f"{logging_prefix}Finished calling custom claim navigation")
-    
-    # Determine if there is a Claim Available or not
-    logging.info(f"{logging_prefix}Trying to determine if there is a claim available!")
-    
-    claim_available_path = base_path+"claim_available.png"
-    noclaim_available_path = base_path+"noclaim_available.png"
-    claim_check_location, claim_check_image = wait_for_any_image_to_exist([claim_available_path, noclaim_available_path], 50)
-
-    if(claim_check_image is claim_available_path):
-        logging.info(f"{logging_prefix}There is a claim available!")
-        
-        claim_check_locationX, claim_check_locationY = location_to_point(claim_check_location)
-        if claimAvailableClickOffset:
-            claim_check_locationX = claim_check_locationX + claimAvailableClickOffset['x']
-            claim_check_locationY = claim_check_locationY + claimAvailableClickOffset['y']
-
-        click_point(claim_check_locationX, claim_check_locationY)
-        
-        # Wait for animations to end
-        time.sleep(1)
-
-        claim_confirmation_path = base_path+"claim_confirmation.png"
-        claim_confirmation_enabled = os.path.isfile(claim_confirmation_path)
-        if claim_confirmation_enabled:
-            claim_confirmation_location = wait_for_image(claim_confirmation_path, 20)
-            if(not claim_confirmation_location):
-                return report_failure(logging_prefix, f"{name_stub}_claim_confirmation_fail.png", f"Unable to find the claim confirmation for some reason! - [{claim_confirmation_path} was not found on the screen]")
-        
-        click_location(claim_confirmation_location)
-        
-        claim_success_path = base_path+"claim_success.png"
-        claim_success_location = wait_for_image(claim_success_path, 20)
-        if(not claim_success_location):
-            return report_failure(logging_prefix, f"{name_stub}_claim_success_fail.png", f"Unable to determine that the claim was finished successfully! - [{claim_success_path} was not found on the screen]")
-        
-        if(health_check_successful_run):
-            ping(health_check_successful_run)
+        login_required_path = base_path+"login_required.png"
+        login_not_required_path = base_path+"login_not_required.png"
+        _, login_check_image = wait_for_any_image_to_exist([login_required_path, login_not_required_path], 50)
+        if (login_check_image is login_required_path):
+            logging.info(f"{logging_prefix}Login is required")
+            
+            logging.info(f"{logging_prefix}Attempting to login")
+            
+            start_login_button_path="start_login.png"
+            start_login_button = wait_for_image(base_path+start_login_button_path, 20)
+            if(not start_login_button):
+                return report_failure(logging_prefix, f"{name_stub}_start_login_fail.png", f"Unable to find the login button to start the login process for some reason! - [{start_login_button_path} was not found on the screen]")
+                
+            click_location(start_login_button)
+            
+            # OPTIONAL - Try to find login selector if it was defined
+            login_selection_image = base_path+"login_selection.png"
+            if os.path.isfile(login_selection_image):
+                logging.info(f"{logging_prefix}Attempting to find login selection element")
+                
+                login_selection_button = wait_for_image(login_selection_image, 20)
+                if(not login_selection_button):
+                    return report_failure(logging_prefix, f"{name_stub}_select_login_type_fail.png", f"Unable to find the login selection button provided for some reason! - [{login_selection_image} was not found on the screen]")
+                    
+                click_location(login_selection_button)
+            
+            logging.info(f"{logging_prefix}Attempting to find login elements")
+            
+            logging.info(f"{logging_prefix}Attempting to fill password")
+            pass_field_location_path="pass_field.png"
+            pass_field_location = wait_for_image(base_path+pass_field_location_path, 20, 0.1, 0.99)
+            if(not pass_field_location):
+                return report_failure(logging_prefix, f"{name_stub}_locate_password_field_fail.png", f"Unable to find the password field for some reason! - [{pass_field_location_path} was not found on the screen]")
+            time.sleep(1)
+            click_location(pass_field_location)
+            pyautogui.typewrite(password)
+            
+            
+            logging.info(f"{logging_prefix}Attempting to fill username")
+            email_field_location_path="email_field.png"
+            email_field_location = wait_for_image(base_path+email_field_location_path, 20, 0.1, 0.99)
+            if(not email_field_location):
+                return report_failure(logging_prefix, f"{name_stub}_locate_email_field_fail.png", f"Unable to find the email/username field for some reason! - [{email_field_location_path} was not found on the screen]")
+            click_location(email_field_location)
+            pyautogui.typewrite(username)
+            
+            #OPTIONAL - Try to click captcha        
+            captcha_enabled = os.path.isfile(base_path+"captcha.png")
+            if(captcha_enabled):
+                logging.info(f"{logging_prefix}Attempting to click captcha")
+                captcha_location_path="captcha.png"
+                captcha_location = wait_for_image(base_path+captcha_location_path, 20, 0.1)
+                if(not captcha_location):
+                    return report_failure(logging_prefix, f"{name_stub}_locate_captcha_fail.png", f"Unable to find the captcha checkbox even though a captcha image was provided! - [{captcha_location_path} was not found on the screen]")
+                click_location(captcha_location)
+                await asyncio.sleep(10)
+            
+            
+            logging.info(f"{logging_prefix}Attempting to submit login information")
+            login_button_location_path="submit_login.png"
+            login_button_location = wait_for_image(base_path+login_button_location_path, 20, 0.1, 0.8)
+            if(not login_button_location):
+                if(captcha_enabled):
+                    return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button, captcha is probably blocking us :(!")
+                else:
+                    return report_failure(logging_prefix, f"{name_stub}_locate_login_button_fail.png", f"Unable to find the login button for some reason! - [{login_button_location_path} was not found on the screen]")
+            click_location(login_button_location)
+            
+            #OPTIONAL - Try to close all popups
+            await closeAnyPopupsFound(logging_prefix, base_path);
+            
+            logged_in = wait_for_image(login_not_required_path, 100)
+            if(not logged_in):
+                return report_failure(logging_prefix, f"{name_stub}_login_fail.png", f"Unable to login! - [{login_not_required_path} was not found on the screen]")
+        elif (login_check_image is login_not_required_path):
+            logging.info(f"{logging_prefix}Login is not required!")
         else:
-            logging.warn(f"No health check run url defined for {name}")
+            return report_failure(logging_prefix, f"{name_stub}_login_determination_fail.png", f"Unable to determine if we need to login to {name} for some reason! - [{login_not_required_path} and {login_required_path} was not found on the screen]")
+        
+        logging.info(f"{logging_prefix}Finished ensuring that we are logged in!")
+        
+        if(customNavigateToClaim is not None):
+            logging.info(f"{logging_prefix}A custom claim navigation was provided, so we will call it now")
+            await customNavigateToClaim(base_path, browser, page)
+            logging.info(f"{logging_prefix}Finished calling custom claim navigation")
+        
+        # Determine if there is a Claim Available or not
+        logging.info(f"{logging_prefix}Trying to determine if there is a claim available!")
+        
+        claim_available_path = base_path+"claim_available.png"
+        noclaim_available_path = base_path+"noclaim_available.png"
+        claim_check_location, claim_check_image = wait_for_any_image_to_exist([claim_available_path, noclaim_available_path], 50)
 
-        if(health_check_successful_claim):
-            ping(health_check_successful_claim)
-        else:
-            logging.warn(f"No health check claim url defined for {name}")
+        if(claim_check_image is claim_available_path):
+            logging.info(f"{logging_prefix}There is a claim available!")
+            
+            claim_check_locationX, claim_check_locationY = location_to_point(claim_check_location)
+            if claimAvailableClickOffset:
+                claim_check_locationX = claim_check_locationX + claimAvailableClickOffset['x']
+                claim_check_locationY = claim_check_locationY + claimAvailableClickOffset['y']
 
-        logging.info(f"{logging_prefix}Finished successfully claiming!")
-    elif(claim_check_image is noclaim_available_path):
-        logging.info(f"{logging_prefix}There is no claim available at this time")
-        if(health_check_successful_run):
-            ping(health_check_successful_run)
+            click_point(claim_check_locationX, claim_check_locationY)
+            
+            # Wait for animations to end
+            time.sleep(1)
+
+            claim_confirmation_path = base_path+"claim_confirmation.png"
+            claim_confirmation_enabled = os.path.isfile(claim_confirmation_path)
+            if claim_confirmation_enabled:
+                claim_confirmation_location = wait_for_image(claim_confirmation_path, 20)
+                if(not claim_confirmation_location):
+                    return report_failure(logging_prefix, f"{name_stub}_claim_confirmation_fail.png", f"Unable to find the claim confirmation for some reason! - [{claim_confirmation_path} was not found on the screen]")
+            
+                click_location(claim_confirmation_location)
+            
+            claim_success_path = base_path+"claim_success.png"
+            claim_success_location = wait_for_image(claim_success_path, 20)
+            if(not claim_success_location):
+                return report_failure(logging_prefix, f"{name_stub}_claim_success_fail.png", f"Unable to determine that the claim was finished successfully! - [{claim_success_path} was not found on the screen]")
+            
+            if(health_check_successful_run):
+                ping(health_check_successful_run)
+            else:
+                logging.warn(f"No health check run url defined for {name}")
+
+            if(health_check_successful_claim):
+                ping(health_check_successful_claim)
+            else:
+                logging.warn(f"No health check claim url defined for {name}")
+
+            logging.info(f"{logging_prefix}Finished successfully claiming!")
+        elif(claim_check_image is noclaim_available_path):
+            logging.info(f"{logging_prefix}There is no claim available at this time")
+            if(health_check_successful_run):
+                ping(health_check_successful_run)
+            else:
+                logging.warn(f"No health check run url defined for {name}")
         else:
-            logging.warn(f"No health check run url defined for {name}")
-    else:
-        return report_failure(logging_prefix, f"{name_stub}_claim_determination_fail.png", f"Unable to determine if there was a claim available! - [{noclaim_available_path} and {claim_available_path} was not found on the screen]")
-    
-    # TODO get the current balance here    
-    
-    # Finished, time to wrap up
-    logging.info(f"{logging_prefix}Finished checking claim, wrapping up")
-    
-    logging.info(f"{logging_prefix}Attempting to close browser")
-    # await browser.close()
+            return report_failure(logging_prefix, f"{name_stub}_claim_determination_fail.png", f"Unable to determine if there was a claim available! - [{noclaim_available_path} and {claim_available_path} was not found on the screen]")
+        
+        # TODO get the current balance here    
+        
+        # Finished, time to wrap up
+        logging.info(f"{logging_prefix}Finished checking claim, wrapping up")
+        
+        logging.info(f"{logging_prefix}Attempting to close browser")
+        # await browser.close()
+    except Exception as ex:
+        return report_failure(logging_prefix, f"{name_stub}_unexpected_error_fail.png", f"An unexpected error occurred that couldn't be handled while processing {name}! - [{repr(ex)}]")
 
 async def navigateToHigh5Claim(base_path, browser, page):
     browser_privacy_okay = wait_for_image(base_path+"browser_privacy_okay.png", 50)
@@ -939,6 +948,13 @@ async def claimDingDingDing():
             base_path="imgs/dingdingding/",
             base_url="https://dingdingding.com/login/"
         )
+    
+async def claimMcLuck():
+    return await genericClaim(
+            name="McLuck",
+            base_path="imgs/mcluck/",
+            base_url="https://www.mcluck.com/login"
+        )
 
 
 #Get all of the keys from the config, which should match the enum values from CasinoEnum
@@ -947,6 +963,7 @@ casino_list = list(CONFIGURATION.keys())
 def casinoEnabled(casino):
     return casino.value in casino_list and len(CONFIGURATION.get(casino.value).get("username")) > 0 and len(CONFIGURATION.get(casino.value).get("password")) > 0
 
+# Set DEMO_MODE to True to only run the code below for development and testing purposes; this should always be set to `False` on commit
 DEMO_MODE = False
 async def main(schedule = RunSchedule.All):
     if (CONFIG_BASE in CONFIGURATION and CONFIG_HEALTH_CHECK_TOOL_RUNNING in CONFIGURATION[CONFIG_BASE]):
@@ -957,8 +974,8 @@ async def main(schedule = RunSchedule.All):
     if(DEMO_MODE):
         print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
         logging.basicConfig(level=logging.DEBUG)
-        # test_for_image("imgs/chumba/daily_bonus_tab.png", confidence=0.9)
-        await claimZula()
+        # test_for_image("imgs/mcluck/webpage-loaded.png", confidence=0.9)
+        await claimMcLuck()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
         exit()
     
@@ -1004,6 +1021,10 @@ async def main(schedule = RunSchedule.All):
             if casinoEnabled(CasinoEnum.DINGDINGDING):
                 #Run DingDingDing claim
                 await claimDingDingDing()
+
+            if casinoEnabled(CasinoEnum.MCLUCK):
+                #Run McLuck claim
+                await claimMcLuck()
         
         # if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
         #     await claimChancedV2()

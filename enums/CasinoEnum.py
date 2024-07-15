@@ -13,3 +13,4 @@ class CasinoEnum(Enum):
     SPORTZINO = "Sportzino"
     RUBYSWEEPS = "Rubysweeps"
     DINGDINGDING = "DingDingDing"
+    MCLUCK = "McLuck"
