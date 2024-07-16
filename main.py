@@ -1,6 +1,7 @@
 import os
 import sys
 import pyautogui
+import ctypes
 import time
 import pytesseract
 import subprocess
@@ -176,6 +177,20 @@ def ping(url):
         # Log ping failure here...
         print("Ping failed: %s" % e)
 
+def is_capslock_on():
+    return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
+
+def set_capslock_on(should_be_on):
+    dll = ctypes.WinDLL('User32.dll')
+    VK_CAPITAL = 0X14
+    
+    if should_be_on and not is_capslock_on():
+        dll.keybd_event(VK_CAPITAL, 0X3a, 0X1, 0)
+        dll.keybd_event(VK_CAPITAL, 0X3a, 0X3, 0)
+    elif not should_be_on and is_capslock_on():
+        dll.keybd_event(VK_CAPITAL, 0X3a, 0X3, 0)
+        dll.keybd_event(VK_CAPITAL, 0X3a, 0X1, 0)
+
 async def navigateToChumbaClaim(base_path, browser, page):
     # click on get_coins.png
     get_coins = wait_for_image(base_path+"get_coins.png")
@@ -212,6 +227,7 @@ async def claimPulsz():
         location = wait_for_image(base_path+"login.png", 20)
         email_location = find_image(base_path+"email.png")
         pass_location = find_image(base_path+"pass.png")
+        
         if location:
             click_location(pass_location)
             pyautogui.typewrite(CONFIGURATION[name][CONFIG_PASSWORD])
@@ -666,6 +682,7 @@ def assertValidConfiguration(name):
 # - health_check_successful_run - OPTIONAL The health check endpoint called on run
 # - health_check_successful_claim - OPTIONAL The health check endpoint called on claim
 async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, claimAvailableClickOffset=None):
+    set_capslock_on(False)
     try:
         assertValidConfiguration(name)
         username = CONFIGURATION[name][CONFIG_USERNAME]
