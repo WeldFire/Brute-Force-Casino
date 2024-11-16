@@ -137,6 +137,7 @@ def test_for_image(img_path, max_tries=10000, delay=0.001, confidence=0.9):
 def click_location(location):
     x, y = location_to_point(location)
     click_point(x, y)
+    time.sleep(0.5)
 
 def location_to_point(location):
     x = location.left + (location.width/2)
@@ -703,11 +704,15 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
         # Try to navigate to the webpage initially
         logging.info(f"{logging_prefix}Trying to navigate to {base_url}")
         browser, page = await start_browser(base_url)
+        
+        
         webpage_loaded_path = "webpage-loaded.png"
-        webpage_loaded = wait_for_image(base_path+webpage_loaded_path, 100)
-        if not webpage_loaded:
-            return report_failure(logging_prefix, f"{name_stub}_navigation_fail.png", f"Unable to load webpage of {name} for some reason! - [{webpage_loaded_path} was not found on the screen]")
-        logging.info(f"{logging_prefix}Able to successfully navigate to {base_url}")
+        webpage_loaded_enabled = os.path.isfile(base_path+webpage_loaded_path)
+        if(webpage_loaded_enabled):
+            webpage_loaded = wait_for_image(base_path+webpage_loaded_path, 100)
+            if not webpage_loaded:
+                return report_failure(logging_prefix, f"{name_stub}_navigation_fail.png", f"Unable to load webpage of {name} for some reason! - [{webpage_loaded_path} was not found on the screen]")
+            logging.info(f"{logging_prefix}Able to successfully navigate to {base_url}")
         
         # Are we logged in? or do we need to login now?
         logging.info(f"{logging_prefix}Trying to detect if we need to login")
@@ -1145,9 +1150,9 @@ async def main(schedule = RunSchedule.All):
         # await claimSportzino()
         # await claimRubysweeps()
         # await claimDingDingDing()
-        # await claimMcLuck()
+        await claimMcLuck()
         # await claimCrownCoinCasino()
-        await claimScratchful()
+        # await claimScratchful()
         # await claimHelloMillions()
         # await claimWowVegas()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
