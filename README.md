@@ -18,5 +18,5 @@ This is a Python project. Follow the steps below to set it up:
 After setting up the configuration file and installing the libraries, you can run the project using the following command:
 
 ```python
-python main.py
+python main_bfc.py
 ```

@@ -14,3 +14,7 @@ class CasinoEnum(Enum):
     RUBYSWEEPS = "Rubysweeps"
     DINGDINGDING = "DingDingDing"
     MCLUCK = "McLuck"
+    CROWNCOINCASINO = "CrownCoin"
+    SCRATCHFUL = "Scratchful"
+    HELLOMILLIONS = "HelloMillions"
+    WOWVEGAS = "WowVegas"

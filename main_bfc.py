@@ -218,67 +218,72 @@ async def getPulszSCBalance(page):
     # return await page.evaluate('document.querySelector("[data-test=\"header-sweepstakes-value\"]").innerText')
 
 async def claimPulsz():
-    try:
-        name = "Pulsz"
-        base_path = "imgs/pulsz/"
-        # Use the functions
-        browser, page = await start_browser("https://www.pulsz.com/login")
-        time.sleep(3) # Login screen appears then goes away, need to convert this to the new method....
-        location = wait_for_image(base_path+"login.png", 20)
-        email_location = find_image(base_path+"email.png")
-        pass_location = find_image(base_path+"pass.png")
+    return await genericClaim(
+            name="Pulsz",
+            base_path="imgs/pulsz/",
+            base_url="https://www.pulsz.com/login"
+        )
+    # try:
+    #     name = "Pulsz"
+    #     base_path = "imgs/pulsz/"
+    #     # Use the functions
+    #     browser, page = await start_browser("https://www.pulsz.com/login")
+    #     time.sleep(3) # Login screen appears then goes away, need to convert this to the new method....
+    #     location = wait_for_image(base_path+"login.png", 20)
+    #     email_location = find_image(base_path+"email.png")
+    #     pass_location = find_image(base_path+"pass.png")
         
-        if location:
-            click_location(pass_location)
-            pyautogui.typewrite(CONFIGURATION[name][CONFIG_PASSWORD])
-            click_location(email_location)
-            pyautogui.typewrite(CONFIGURATION[name][CONFIG_USERNAME])
-            click_location(location)
+    #     if location:
+    #         click_location(pass_location)
+    #         pyautogui.typewrite(CONFIGURATION[name][CONFIG_PASSWORD])
+    #         click_location(email_location)
+    #         pyautogui.typewrite(CONFIGURATION[name][CONFIG_USERNAME])
+    #         click_location(location)
             
-            # document.querySelector("").value = '';
-            # document.querySelector("button[id='login_submit-button']").click(); //Error???
-        else:
-            print("Doesn't look like we needed to log in")
+    #         # document.querySelector("").value = '';
+    #         # document.querySelector("button[id='login_submit-button']").click(); //Error???
+    #     else:
+    #         print("Doesn't look like we needed to log in")
         
-        time.sleep(1)
+    #     time.sleep(1)
         
-        claim_img_path = base_path+"claim.png"
-        noclaim_img_path = base_path+"noclaim.png"
-        loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 50)
+    #     claim_img_path = base_path+"claim.png"
+    #     noclaim_img_path = base_path+"noclaim.png"
+    #     loaded_location, loaded_image = wait_for_any_image_to_exist([claim_img_path, noclaim_img_path], 50)
         
-        if(loaded_image is claim_img_path):
-            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
-                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
-            else:
-                logging.warn(f"No health check run url defined for {name}")
+    #     if(loaded_image is claim_img_path):
+    #         if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+    #             ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+    #         else:
+    #             logging.warn(f"No health check run url defined for {name}")
 
-            click_location(loaded_location)
+    #         click_location(loaded_location)
 
-            if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
-                ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
-            else:
-                logging.warn(f"No health check claim url defined for {name}")
-            balance = await getPulszSCBalance(page)
-            print(f"Current Pulsz Balance is {balance}")
-        elif(loaded_image is noclaim_img_path):
-            print(f"No claim available right now!")
+    #         if CONFIG_HEALTH_CLAIM in CONFIGURATION[name]:
+    #             ping(CONFIGURATION[name][CONFIG_HEALTH_CLAIM])
+    #         else:
+    #             logging.warn(f"No health check claim url defined for {name}")
+    #         balance = await getPulszSCBalance(page)
+    #         print(f"Current Pulsz Balance is {balance}")
+    #     elif(loaded_image is noclaim_img_path):
+    #         print(f"No claim available right now!")
 
-            if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
-                ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
-            else:
-                logging.warn(f"No health check run url defined for {name}")
+    #         if CONFIG_HEALTH_RUN in CONFIGURATION[name]:
+    #             ping(CONFIGURATION[name][CONFIG_HEALTH_RUN])
+    #         else:
+    #             logging.warn(f"No health check run url defined for {name}")
 
-            balance = await getPulszSCBalance(page)
-            print(f"Current Pulsz Balance is {balance}")
-        else:
-            # take a screenshot of the entire screen
-            screenshot_name = "pulsz_login_fail.png"
-            pyautogui.screenshot(screenshot_name)
-            print(f"Unable to login!! Screen saved to {screenshot_name}")
+    #         balance = await getPulszSCBalance(page)
+    #         print(f"Current Pulsz Balance is {balance}")
+    #     else:
+    #         # take a screenshot of the entire screen
+    #         screenshot_name = "pulsz_login_fail.png"
+    #         pyautogui.screenshot(screenshot_name)
+    #         print(f"Unable to login!! Screen saved to {screenshot_name}")
             
-        # await browser.close()
-    except Exception as ex:
-        return report_failure("PulszManualClaimer", f"pulsz_unexpected_error_fail.png", f"An unexpected error occurred that couldn't be handled while processing {name}! - [{repr(ex)}]")
+    #     # await browser.close()
+    # except Exception as ex:
+    #     return report_failure("PulszManualClaimer", f"pulsz_unexpected_error_fail.png", f"An unexpected error occurred that couldn't be handled while processing {name}! - [{repr(ex)}]")
 
 async def getChancedSCBalance(page):
     print("TODO getChancedSCBalance SEEMS BROKEN!")
@@ -624,7 +629,7 @@ async def closeAnyPopupsFound(logging_prefix, base_path):
     if(popup_closer_enabled):
         logging.info(f"{logging_prefix}Attempting to close popups")
         while True:
-            popup_close_location = wait_for_image(base_path+popup_closer_location_path, 20, 0.1, confidence=0.9)
+            popup_close_location = wait_for_image(base_path+popup_closer_location_path, 50, 0.1, confidence=0.9)
             if(popup_close_location):
                 click_location(popup_close_location)
                 logging.info(f"{logging_prefix}Found a popup to close!")
@@ -676,6 +681,7 @@ def assertValidConfiguration(name):
 # - claim_available.png - Determines if there is a claim available (Clicked)
 # - noclaim_available.png - Determines if there is no claim currently available to claim right now (Visual Only)
 # - claim_confirmation.png - OPTIONAL - Ensures that claim confirmations are clicked (Clicked)
+# - captcha2.png - OPTIONAL - If provided, tries to click on a captcha, probably won't work, but hey, it sometimes does 😅 (Clicked)
 # - claim_success.png - Indicator that the claim was successful (Visual Only)
 # EXPECTED CONFIGURATION:
 # - username - The username or email field to be used to login
@@ -739,7 +745,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
             
             logging.info(f"{logging_prefix}Attempting to fill password")
             pass_field_location_path="pass_field.png"
-            pass_field_location = wait_for_image(base_path+pass_field_location_path, 20, 0.1, 0.99)
+            pass_field_location = wait_for_image(base_path+pass_field_location_path, 20, 0.1, 0.95)
             if(not pass_field_location):
                 return report_failure(logging_prefix, f"{name_stub}_locate_password_field_fail.png", f"Unable to find the password field for some reason! - [{pass_field_location_path} was not found on the screen]")
             time.sleep(1)
@@ -749,7 +755,7 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
             
             logging.info(f"{logging_prefix}Attempting to fill username")
             email_field_location_path="email_field.png"
-            email_field_location = wait_for_image(base_path+email_field_location_path, 20, 0.1, 0.99)
+            email_field_location = wait_for_image(base_path+email_field_location_path, 20, 0.1, 0.95)
             if(not email_field_location):
                 return report_failure(logging_prefix, f"{name_stub}_locate_email_field_fail.png", f"Unable to find the email/username field for some reason! - [{email_field_location_path} was not found on the screen]")
             click_location(email_field_location)
@@ -823,6 +829,19 @@ async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, cl
                     return report_failure(logging_prefix, f"{name_stub}_claim_confirmation_fail.png", f"Unable to find the claim confirmation for some reason! - [{claim_confirmation_path} was not found on the screen]")
             
                 click_location(claim_confirmation_location)
+
+            
+            #OPTIONAL - Try to click captcha        
+            captcha2_enabled = os.path.isfile(base_path+"captcha2.png")
+            if(captcha2_enabled):
+                logging.info(f"{logging_prefix}Attempting to click captcha")
+                captcha_location_path="captcha2.png"
+                captcha_location = wait_for_image(base_path+captcha_location_path, 20, 0.1)
+                if(not captcha_location):
+                    return report_failure(logging_prefix, f"{name_stub}_locate_captcha_fail.png", f"Unable to find the captcha checkbox even though a captcha image was provided! - [{captcha_location_path} was not found on the screen]")
+                click_location(captcha_location)
+                await asyncio.sleep(10)
+
             
             claim_success_path = base_path+"claim_success.png"
             claim_success_location = wait_for_image(claim_success_path, 20)
@@ -892,10 +911,96 @@ async def navigateToHigh5Claim(base_path, browser, page):
             return report_failure("High 5 Claim Navigation", f"high_5_claim_bonus_popup_confirmation_fail.png", f"Unable to confirm the popup is open! - [{bonus_popup_open_confirmation_path} was not found on the screen]")
     print("Bonus popup should be open now")
 
+
+async def navigateToScratchfulClaim(base_path, browser, page):
+    get_coins_file = "get_coins.png"
+    get_coins = wait_for_image(base_path+get_coins_file, 50)
+    if get_coins:
+        click_location(get_coins)
+    else:
+        return report_failure("Scratchful Claim Navigation", f"scratchful_navigate_promotions_fail.png", f"Unable to find get coins button on the side [{get_coins_file} was not found on the screen]")
+    
+    closeAnyPopupsFound("Scratchful Claim Navigation", base_path)
+
+    await asyncio.sleep(1)
+
+
+async def navigateToHelloMillionsClaim(base_path, browser, page):
+    get_coins_file = "get_coins.png"
+    get_coins = wait_for_image(base_path+get_coins_file, 50)
+    if get_coins:
+        click_location(get_coins)
+    else:
+        return report_failure("HelloMillions Claim Navigation", f"hellomillions_navigate_promotions_fail.png", f"Unable to find get coins button on the side [{get_coins_file} was not found on the screen]")
+    
+    closeAnyPopupsFound("HelloMillions Claim Navigation", base_path)
+
+    await asyncio.sleep(1)
+    
+
+async def navigateToWowVegasClaim(base_path, browser, page):
+    promotions_file = "promotions.png"
+    promotions = wait_for_image(base_path+promotions_file, 50)
+    if promotions:
+        click_location(promotions)
+    else:
+        return report_failure("WowVegas Claim Navigation", f"wowvegas_navigate_promotions_fail.png", f"Unable to find promotions tab on the side [{promotions_file} was not found on the screen]")
+    
+    WowCoins_file = "WowCoins.png"
+    WowCoins = wait_for_image(base_path+WowCoins_file, 50)
+    if WowCoins:
+        click_location(WowCoins)
+    else:
+        return report_failure("WowVegas Claim Navigation", f"wowvegas_navigate_wowcoins_filter_fail.png", f"Unable to find wow coins filter [{WowCoins_file} was not found on the screen]")
+    
+    daily_coins_file = "daily_coins.png"
+    daily_coins = wait_for_image(base_path+daily_coins_file, 50)
+    if daily_coins:
+        click_location(daily_coins)
+    else:
+        return report_failure("WowVegas Claim Navigation", f"wowvegas_navigate_daily_coins_fail.png", f"Unable to find daily coins button [{daily_coins_file} was not found on the screen]")
+    
+    print("Scroll to the bottom of the page")
+    pyautogui.hotkey('ctrl', 'end')
+
+    await asyncio.sleep(1)
+
+
 async def navigateToMcLuckClaim(base_path, browser, page):
     get_coins = wait_for_image(base_path+"get_coins.png", 50)
     if get_coins:
         click_location(get_coins)
+
+async def navigateToDingDingDingClaim(base_path, browser, page):
+    login_not_required = wait_for_image(base_path+"login_not_required.png", 50)
+    if login_not_required:
+        click_location(login_not_required)
+
+async def navigateToCrownCoinCasinoClaim(base_path, browser, page):
+    logging_prefix = "Crown Coin Claim Navigation"
+    ok_popup_path = base_path+"ok_popup.png"
+    ok_popup = wait_for_image(ok_popup_path, 50)
+    if ok_popup:
+        logging.info(f"{logging_prefix}Found an OK popup to close!")
+        click_location(ok_popup)
+    else:
+        logging.debug(f"{logging_prefix}We weren't able to find an OK popup to close!")
+    
+    
+    side_menu_path = base_path+"side_menu.png"
+    side_menu = wait_for_image(side_menu_path, 50)
+    if side_menu:
+        click_location(side_menu)
+        time.sleep(1)
+    else:
+        return report_failure(logging_prefix, f"crown_coin_claim_side_menu_click_fail.png", f"Unable to find the side menu! - [{side_menu_path} was not found on the screen]")
+    
+    rewards_path = base_path+"rewards.png"
+    rewards = wait_for_image(rewards_path, 50, confidence=0.95)
+    if rewards:
+        click_location(rewards)
+    else:
+        return report_failure(logging_prefix, f"crown_coin_claim_reward_menu_click_fail.png", f"Unable to find the side menu! - [{side_menu_path} was not found on the screen]")
 
 async def navigateToZulaClaim(base_path, browser, page):
     # close_modal.png
@@ -966,7 +1071,8 @@ async def claimDingDingDing():
     return await genericClaim(
             name="DingDingDing",
             base_path="imgs/dingdingding/",
-            base_url="https://dingdingding.com/login/"
+            base_url="https://dingdingding.com/login/",
+            customNavigateToClaim=navigateToDingDingDingClaim
         )
     
 async def claimMcLuck():
@@ -975,6 +1081,39 @@ async def claimMcLuck():
             base_path="imgs/mcluck/",
             base_url="https://www.mcluck.com/login",
             customNavigateToClaim=navigateToMcLuckClaim
+        )
+    
+async def claimCrownCoinCasino():
+    return await genericClaim(
+            name="CrownCoin",
+            base_path="imgs/crowncoin/",
+            base_url="https://crowncoinscasino.com/",
+            # customNavigateToClaim=navigateToCrownCoinCasinoClaim
+        )
+    
+async def claimScratchful():
+    return await genericClaim(
+            name="Scratchful",
+            base_path="imgs/scratchful/",
+            base_url="https://www.scratchful.com/login",
+            customNavigateToClaim=navigateToScratchfulClaim
+        )
+    
+async def claimHelloMillions():
+    return await genericClaim(
+            name="HelloMillions",
+            base_path="imgs/hellomillions/",
+            base_url="https://www.hellomillions.com/",
+            customNavigateToClaim=navigateToHelloMillionsClaim
+        )
+
+    
+async def claimWowVegas():
+    return await genericClaim(
+            name="WowVegas",
+            base_path="imgs/wowvegas/",
+            base_url="https://www.wowvegas.com",
+            customNavigateToClaim=navigateToWowVegasClaim
         )
 
 
@@ -995,10 +1134,22 @@ async def main(schedule = RunSchedule.All):
     if(DEMO_MODE):
         print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
         logging.basicConfig(level=logging.DEBUG)
-        # test_for_image("imgs/mcluck/webpage-loaded.png", confidence=0.9)
-        await claimHigh5()
+        # test_for_image("D:\projects\BruteForceCasino\imgs\zula\pass_field.png", confidence=0.98)
+        # await claimChumba()
+        # await claimLuckylandslots()
         # await claimFortuneCoinsV2()
+        # await claimZula()
+        # await claimPulsz()
+        # await claimHigh5()
+        # await claimModo()
+        # await claimSportzino()
+        # await claimRubysweeps()
+        # await claimDingDingDing()
         # await claimMcLuck()
+        # await claimCrownCoinCasino()
+        await claimScratchful()
+        # await claimHelloMillions()
+        # await claimWowVegas()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
         exit()
     
@@ -1048,6 +1199,22 @@ async def main(schedule = RunSchedule.All):
             if casinoEnabled(CasinoEnum.MCLUCK):
                 #Run McLuck claim
                 await claimMcLuck()
+
+            if casinoEnabled(CasinoEnum.CROWNCOINCASINO):
+                #Run Crown Coin Casino claim
+                await claimCrownCoinCasino()
+
+            if casinoEnabled(CasinoEnum.SCRATCHFUL):
+                #Run Scratchful claim
+                await claimScratchful()
+
+            if casinoEnabled(CasinoEnum.HELLOMILLIONS):
+                #Run Hello Millions claim
+                await claimHelloMillions()
+
+            if casinoEnabled(CasinoEnum.WOWVEGAS):
+                #Run WowVegas claim
+                await claimWowVegas()
         
         # if RunSchedule.EveryHour.isCompatibleWithRunSchedule(schedule):
         #     await claimChancedV2()

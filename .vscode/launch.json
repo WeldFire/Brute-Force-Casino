@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Debug main.py",
+            "name": "Python: Debug main_bfc.py",
             "type": "python",
             "request": "launch",
-            "program": "main.py",
+            "program": "main_bfc.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }

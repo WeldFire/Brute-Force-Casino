@@ -73,5 +73,29 @@
         "password": "",
         "health_check_successful_run": "https://healthchecks.io/ping/8e2bf816-2542-4918-b08c-36af850db0ad",
         "health_check_successful_claim":"https://healthchecks.io/ping/b65144b9-623f-4980-8d64-8cc2c53f5665"
+    },
+    "CrownCoin":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/8e2bf816-2542-4918-b08c-36af850db0ad",
+        "health_check_successful_claim":"https://healthchecks.io/ping/b65144b9-623f-4980-8d64-8cc2c53f5665"
+    },
+    "Scratchful":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/8e2bf816-2542-4918-b08c-36af850db0ad",
+        "health_check_successful_claim":"https://healthchecks.io/ping/b65144b9-623f-4980-8d64-8cc2c53f5665"
+    },
+    "HelloMillions":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/8e2bf816-2542-4918-b08c-36af850db0ad",
+        "health_check_successful_claim":"https://healthchecks.io/ping/b65144b9-623f-4980-8d64-8cc2c53f5665"
+    },
+    "WowVegas":{
+        "username": "",
+        "password": "",
+        "health_check_successful_run": "https://healthchecks.io/ping/8e2bf816-2542-4918-b08c-36af850db0ad",
+        "health_check_successful_claim":"https://healthchecks.io/ping/b65144b9-623f-4980-8d64-8cc2c53f5665"
     }
 }
