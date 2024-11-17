@@ -925,7 +925,7 @@ async def navigateToScratchfulClaim(base_path, browser, page):
     else:
         return report_failure("Scratchful Claim Navigation", f"scratchful_navigate_promotions_fail.png", f"Unable to find get coins button on the side [{get_coins_file} was not found on the screen]")
     
-    closeAnyPopupsFound("Scratchful Claim Navigation", base_path)
+    await closeAnyPopupsFound("Scratchful Claim Navigation", base_path)
 
     await asyncio.sleep(1)
 
@@ -938,7 +938,7 @@ async def navigateToHelloMillionsClaim(base_path, browser, page):
     else:
         return report_failure("HelloMillions Claim Navigation", f"hellomillions_navigate_promotions_fail.png", f"Unable to find get coins button on the side [{get_coins_file} was not found on the screen]")
     
-    closeAnyPopupsFound("HelloMillions Claim Navigation", base_path)
+    await closeAnyPopupsFound("HelloMillions Claim Navigation", base_path)
 
     await asyncio.sleep(1)
     
@@ -1139,7 +1139,7 @@ async def main(schedule = RunSchedule.All):
     if(DEMO_MODE):
         print(f"~~~~~~~~~~RUNNING IN DEMO MODE!~~~~~~~~~~")
         logging.basicConfig(level=logging.DEBUG)
-        # test_for_image("D:\projects\BruteForceCasino\imgs\zula\pass_field.png", confidence=0.98)
+        # test_for_image("D:\\projects\\BruteForceCasino\\imgs\\dingdingding\\noclaim_available.png", confidence=0.8)
         # await claimChumba()
         # await claimLuckylandslots()
         # await claimFortuneCoinsV2()
@@ -1149,8 +1149,8 @@ async def main(schedule = RunSchedule.All):
         # await claimModo()
         # await claimSportzino()
         # await claimRubysweeps()
-        # await claimDingDingDing()
-        await claimMcLuck()
+        await claimDingDingDing()
+        # await claimMcLuck()
         # await claimCrownCoinCasino()
         # await claimScratchful()
         # await claimHelloMillions()
