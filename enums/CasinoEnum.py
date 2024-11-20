@@ -15,6 +15,7 @@ class CasinoEnum(Enum):
     DINGDINGDING = "DingDingDing"
     MCLUCK = "McLuck"
     CROWNCOINCASINO = "CrownCoin"
+    SPINBLITZ = "Spinblitz"
     SCRATCHFUL = "Scratchful"
     HELLOMILLIONS = "HelloMillions"
     WOWVEGAS = "WowVegas"

@@ -917,15 +917,15 @@ async def navigateToHigh5Claim(base_path, browser, page):
     print("Bonus popup should be open now")
 
 
-async def navigateToScratchfulClaim(base_path, browser, page):
+async def navigateToSpinblitzClaim(base_path, browser, page):
     get_coins_file = "get_coins.png"
     get_coins = wait_for_image(base_path+get_coins_file, 50)
     if get_coins:
         click_location(get_coins)
     else:
-        return report_failure("Scratchful Claim Navigation", f"scratchful_navigate_promotions_fail.png", f"Unable to find get coins button on the side [{get_coins_file} was not found on the screen]")
+        return report_failure("Spinblitz Claim Navigation", f"spinblitz_navigate_promotions_fail.png", f"Unable to find get coins button on the side [{get_coins_file} was not found on the screen]")
     
-    await closeAnyPopupsFound("Scratchful Claim Navigation", base_path)
+    await closeAnyPopupsFound("Spinblitz Claim Navigation", base_path)
 
     await asyncio.sleep(1)
 
@@ -1096,12 +1096,12 @@ async def claimCrownCoinCasino():
             # customNavigateToClaim=navigateToCrownCoinCasinoClaim
         )
     
-async def claimScratchful():
+async def claimSpinblitz():
     return await genericClaim(
-            name="Scratchful",
-            base_path="imgs/scratchful/",
-            base_url="https://www.scratchful.com/login",
-            customNavigateToClaim=navigateToScratchfulClaim
+            name="Spinblitz",
+            base_path="imgs/spinblitz/",
+            base_url="https://www.spinblitz.com/login",
+            customNavigateToClaim=navigateToSpinblitzClaim
         )
     
 async def claimHelloMillions():
@@ -1149,10 +1149,10 @@ async def main(schedule = RunSchedule.All):
         # await claimModo()
         # await claimSportzino()
         # await claimRubysweeps()
-        await claimDingDingDing()
+        # await claimDingDingDing()
         # await claimMcLuck()
         # await claimCrownCoinCasino()
-        # await claimScratchful()
+        await claimSpinblitz()
         # await claimHelloMillions()
         # await claimWowVegas()
         print(f"~~~~~~~~~~FINISHED RUNNING IN DEMO MODE!~~~~~~~~~~")
@@ -1161,6 +1161,12 @@ async def main(schedule = RunSchedule.All):
     try:        
         if RunSchedule.SixHours.isCompatibleWithRunSchedule(schedule):
             #Check if each of the Enums exist in the key list, so we know if the configuration has been filled out
+
+            if casinoEnabled(CasinoEnum.SCRATCHFUL):
+                logging.error("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                logging.error("Scratchful has been converted to 'Spinblitz' please rename your Scratchful casino to Spinblitz in config.json, your credentials are the same")
+                logging.error("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
             if casinoEnabled(CasinoEnum.CHUMBA):
                 #Run Chumba claim
                 await claimChumba()
@@ -1209,9 +1215,9 @@ async def main(schedule = RunSchedule.All):
                 #Run Crown Coin Casino claim
                 await claimCrownCoinCasino()
 
-            if casinoEnabled(CasinoEnum.SCRATCHFUL):
-                #Run Scratchful claim
-                await claimScratchful()
+            if casinoEnabled(CasinoEnum.SPINBLITZ):
+                #Run Spinblitz claim
+                await claimSpinblitz()
 
             if casinoEnabled(CasinoEnum.HELLOMILLIONS):
                 #Run Hello Millions claim
