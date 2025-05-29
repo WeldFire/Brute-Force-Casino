@@ -1,6 +1,5 @@
 import platform
 import subprocess
-import psutil
 import time
 import re
 

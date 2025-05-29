@@ -1,7 +1,6 @@
 import os
 import sys
 import pyautogui
-import ctypes
 import time
 import pytesseract
 import subprocess
@@ -15,9 +14,6 @@ from utils import get_active_window_title
 from enum import Enum
 import json
 from enums.CasinoEnum import CasinoEnum
-from pywinauto.findwindows    import find_window
-from win32gui import ShowWindow
-import win32con
 
 def moduleExists(module):
     return (module in sys.modules) and (module in dir())
@@ -54,7 +50,8 @@ CONFIGURATION = load_configuration()
 
 # browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
 # browser_title_fragment = " - Brave"
-browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
+# browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
+browser_path = "opera" # Or "firefox" or "chromium-browser" - will need to be in PATH
 browser_title_fragment = " - Opera"
 # browser_path = r'firefox'
 # browser_title_fragment = " - Mozilla Firefox"
@@ -71,24 +68,21 @@ class MockBrowser:
             pyautogui.hotkey('alt', 'f4')
             
     async def focus(self):
-        if moduleExists(win32con):
-            ShowWindow(find_window(title_re=f".*?{browser_title_fragment}"), win32con.SW_MAXIMIZE)
+        pass # Focusing is generally not required or handled differently in Xvfb
             
     async def minimize(self):
-        if moduleExists(win32con):
-            ShowWindow(find_window(title_re=f".*?{browser_title_fragment}"), win32con.SW_MINIMIZE)
+        pass # Minimizing is generally not required in Xvfb
         
 
 
 async def start_browser(url):
-    subprocess.Popen([browser_path, "--remote-debugging-port=9322", url], shell=True)
+    subprocess.Popen([browser_path, "--remote-debugging-port=9322", url], shell=False)
     # controlled_id=run_app([browser_path, "--remote-debugging-port=9322", url], True)
     # browser = await connect(browserURL='http://localhost:9322', defaultViewport={'width': 1366,'height': 768})
     # page = (await browser.pages())[-1]
     browser = MockBrowser()
     page = None
     time.sleep(5) # Sleeping because Opera GX plays the dumb loading animation even though I turned it off.....
-    await browser.focus()
     return browser, page
 
 def wait_for_any_image_to_exist(img_paths, max_tries=-1, delay=0.1):
@@ -177,20 +171,6 @@ def ping(url):
     except requests.RequestException as e:
         # Log ping failure here...
         print("Ping failed: %s" % e)
-
-def is_capslock_on():
-    return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
-
-def set_capslock_on(should_be_on):
-    dll = ctypes.WinDLL('User32.dll')
-    VK_CAPITAL = 0X14
-    
-    if should_be_on and not is_capslock_on():
-        dll.keybd_event(VK_CAPITAL, 0X3a, 0X1, 0)
-        dll.keybd_event(VK_CAPITAL, 0X3a, 0X3, 0)
-    elif not should_be_on and is_capslock_on():
-        dll.keybd_event(VK_CAPITAL, 0X3a, 0X3, 0)
-        dll.keybd_event(VK_CAPITAL, 0X3a, 0X1, 0)
 
 async def navigateToChumbaClaim(base_path, browser, page):
     # click on get_coins.png
@@ -690,7 +670,6 @@ def assertValidConfiguration(name):
 # - health_check_successful_run - OPTIONAL The health check endpoint called on run
 # - health_check_successful_claim - OPTIONAL The health check endpoint called on claim
 async def genericClaim(name, base_path, base_url, customNavigateToClaim=None, claimAvailableClickOffset=None):
-    set_capslock_on(False)
     try:
         assertValidConfiguration(name)
         username = CONFIGURATION[name][CONFIG_USERNAME]
