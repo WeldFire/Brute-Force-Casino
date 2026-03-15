@@ -1,5 +1,6 @@
 import os
 import sys
+import platform
 import pyautogui
 import ctypes
 import time
@@ -15,9 +16,21 @@ from utils import get_active_window_title
 from enum import Enum
 import json
 from enums.CasinoEnum import CasinoEnum
-from pywinauto.findwindows    import find_window
-from win32gui import ShowWindow
-import win32con
+
+_IS_WINDOWS = platform.system() == 'Windows'
+
+if _IS_WINDOWS:
+    from pywinauto.findwindows import find_window
+    from win32gui import ShowWindow
+    import win32con
+else:
+    # On Linux, use a virtual display (Xvfb) so the browser and pyautogui work
+    # without a physical screen.  The browser runs in *headed* mode inside the
+    # virtual framebuffer, which means Cloudflare / captcha checks see a real
+    # browser with genuine WebGL, Canvas, and navigator.webdriver == false.
+    from pyvirtualdisplay import Display as _VirtualDisplay
+    _virtual_display = _VirtualDisplay(visible=False, size=(1920, 1080))
+    _virtual_display.start()
 
 def moduleExists(module):
     return (module in sys.modules) and (module in dir())
@@ -52,12 +65,27 @@ def load_configuration():
 
 CONFIGURATION = load_configuration()
 
-# browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
-# browser_title_fragment = " - Brave"
-browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
-browser_title_fragment = " - Opera"
-# browser_path = r'firefox'
-# browser_title_fragment = " - Mozilla Firefox"
+if _IS_WINDOWS:
+    # browser_path = r'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'
+    # browser_title_fragment = " - Brave"
+    browser_path = r'C:\Users\Administrator\AppData\Local\Programs\Opera GX\launcher.exe'
+    browser_title_fragment = " - Opera"
+    # browser_path = r'firefox'
+    # browser_title_fragment = " - Mozilla Firefox"
+else:
+    # On Linux, prefer google-chrome then chromium-browser then chromium.
+    # Running in a real-headed mode inside Xvfb means Cloudflare/captchas see
+    # a genuine Chrome instance — no headless tells.
+    def _find_linux_browser():
+        for candidate in ('google-chrome', 'google-chrome-stable', 'chromium-browser', 'chromium'):
+            try:
+                path = subprocess.check_output(['which', candidate], text=True).strip()
+                if path:
+                    return path, ' - Google Chrome' if 'chrome' in candidate else ' - Chromium'
+            except subprocess.CalledProcessError:
+                pass
+        raise RuntimeError("No supported browser found. Install google-chrome or chromium-browser.")
+    browser_path, browser_title_fragment = _find_linux_browser()
 
 # pytesseract.pytesseract.tesseract_cmd = r'<path_to_your_tesseract_executable>'
 
@@ -65,29 +93,50 @@ class MockBrowser:
     async def close(self):
         windowTitle = get_active_window_title()
         print("Browser Close Called! Title - " + windowTitle)
-        
+
         if(browser_title_fragment in windowTitle):
             # pyautogui.hotkey('ctrl', 'w') # Close the tab
             pyautogui.hotkey('alt', 'f4')
-            
+
     async def focus(self):
-        if moduleExists(win32con):
+        if _IS_WINDOWS:
             ShowWindow(find_window(title_re=f".*?{browser_title_fragment}"), win32con.SW_MAXIMIZE)
-            
+        else:
+            subprocess.call(['wmctrl', '-a', browser_title_fragment.strip(' -')])
+
     async def minimize(self):
-        if moduleExists(win32con):
+        if _IS_WINDOWS:
             ShowWindow(find_window(title_re=f".*?{browser_title_fragment}"), win32con.SW_MINIMIZE)
+        else:
+            subprocess.call(['wmctrl', '-r', browser_title_fragment.strip(' -'), '-b', 'add,hidden'])
         
 
 
 async def start_browser(url):
-    subprocess.Popen([browser_path, "--remote-debugging-port=9322", url], shell=True)
+    if _IS_WINDOWS:
+        cmd = [browser_path, "--remote-debugging-port=9322", url]
+        subprocess.Popen(cmd, shell=True)
+        time.sleep(5)  # Opera GX loading animation delay
+    else:
+        # On Linux the browser runs headed inside the Xvfb virtual display.
+        # --disable-blink-features=AutomationControlled prevents sites from
+        # detecting that Chrome was launched with automation flags, which is the
+        # primary signal used by Cloudflare and most captcha providers.
+        cmd = [
+            browser_path,
+            "--remote-debugging-port=9322",
+            "--disable-blink-features=AutomationControlled",
+            "--no-first-run",
+            "--disable-infobars",
+            url,
+        ]
+        subprocess.Popen(cmd, shell=False)
+        time.sleep(3)
     # controlled_id=run_app([browser_path, "--remote-debugging-port=9322", url], True)
     # browser = await connect(browserURL='http://localhost:9322', defaultViewport={'width': 1366,'height': 768})
     # page = (await browser.pages())[-1]
     browser = MockBrowser()
     page = None
-    time.sleep(5) # Sleeping because Opera GX plays the dumb loading animation even though I turned it off.....
     await browser.focus()
     return browser, page
 
@@ -179,18 +228,31 @@ def ping(url):
         print("Ping failed: %s" % e)
 
 def is_capslock_on():
-    return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
+    if _IS_WINDOWS:
+        return True if ctypes.WinDLL("User32.dll").GetKeyState(0x14) else False
+    else:
+        try:
+            result = subprocess.check_output(['xset', 'q'], text=True)
+            return 'Caps Lock:   on' in result
+        except Exception:
+            return False
 
 def set_capslock_on(should_be_on):
-    dll = ctypes.WinDLL('User32.dll')
-    VK_CAPITAL = 0X14
-    
-    if should_be_on and not is_capslock_on():
-        dll.keybd_event(VK_CAPITAL, 0X3a, 0X1, 0)
-        dll.keybd_event(VK_CAPITAL, 0X3a, 0X3, 0)
-    elif not should_be_on and is_capslock_on():
-        dll.keybd_event(VK_CAPITAL, 0X3a, 0X3, 0)
-        dll.keybd_event(VK_CAPITAL, 0X3a, 0X1, 0)
+    if _IS_WINDOWS:
+        dll = ctypes.WinDLL('User32.dll')
+        VK_CAPITAL = 0X14
+        if should_be_on and not is_capslock_on():
+            dll.keybd_event(VK_CAPITAL, 0X3a, 0X1, 0)
+            dll.keybd_event(VK_CAPITAL, 0X3a, 0X3, 0)
+        elif not should_be_on and is_capslock_on():
+            dll.keybd_event(VK_CAPITAL, 0X3a, 0X3, 0)
+            dll.keybd_event(VK_CAPITAL, 0X3a, 0X1, 0)
+    else:
+        if should_be_on != is_capslock_on():
+            try:
+                subprocess.call(['xdotool', 'key', 'Caps_Lock'])
+            except Exception:
+                pass
 
 async def navigateToChumbaClaim(base_path, browser, page):
     # click on get_coins.png

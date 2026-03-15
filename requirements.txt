@@ -1,11 +1,9 @@
 pyautogui
 pytesseract
-pywinauto
-pygetwindow
 pyppeteer
 asyncio
 requests
 apscheduler
 psutil
 opencv-python
-pywinauto
+pyvirtualdisplay
